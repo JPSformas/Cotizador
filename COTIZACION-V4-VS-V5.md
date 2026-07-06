@@ -325,6 +325,46 @@ Toggle texto "Precios actualizados" + botón refresh **sobre la tabla**.
 
 **Assets nuevos:** `IMG/lock-solid.svg`, `lock-open-solid.svg` (el HTML usa **SVG inline** en `detalle-cotizacion.html`; los archivos no están referenciados en el markup).
 
+### Comportamiento esperado — lock de precios
+
+Misma lógica de negocio que el toggle **"Precios actualizados"** de v4; en v5 se expresa como dos modos con iconos de candado.
+
+#### Dos modos
+
+| Modo | Control | Estado por defecto | Efecto en la tabla |
+|------|---------|-------------------|-------------------|
+| **Precios bloqueados** | `#preciosActualizadosOff` — candado rojo | ✅ Activo al cargar | Muestra el **PVP de la cotización** (`data-original-price`). Si el catálogo cambió respecto a ese valor, aparece ícono de advertencia, columna **PVP actual** con % de variación, y botón refresh **por fila** habilitado. |
+| **Precios actualizados** | `#preciosActualizadosOn` — candado verde abierto | — | Muestra el **precio actual del catálogo** (`data-current-price`). Oculta advertencias, muestra ícono de check, **deshabilita** refresh (global y por fila) y oculta la columna **PVP actual**. |
+
+Equivalencia con v4: `actualizarPreciosToggle` **activado** ≈ `preciosActualizadosOn`; **desactivado** ≈ `preciosActualizadosOff`.
+
+#### Fecha de bloqueo (`#preciosLockedDate`)
+
+- **Visible** solo en modo **bloqueados** (se oculta con la clase `.is-unlocked` cuando el modo es "actualizados").
+- **Representa** cuándo se fijaron los precios de la cotización — no la fecha de última actualización del catálogo por ítem.
+- **Al pasar a bloqueados**, el prototipo setea la fecha en **hoy** (`setLockedDate(new Date())` en `price-update-indicator.js`).
+- **Al cargar la página**, no se recalcula: queda el valor del HTML (placeholder `05/06/26`) hasta que el usuario cambie el toggle.
+- **Formato:** texto corto `DD/MM/YY`; atributo `datetime` en ISO; tooltip *"Precios bloqueados el DD/MM/YYYY"*.
+
+> **Producción (pendiente):** la fecha debería persistirse con la cotización (guardar al bloquear / restaurar al abrir), no generarse siempre con `new Date()` en el cliente.
+
+#### Tooltips por ítem (distinto de la fecha de bloqueo)
+
+En modo **bloqueados**, si un ítem tiene variación de precio, el ícono `.pvp-warning-icon` muestra tooltip *"Precio actualizado el …"* usando `data-price-updated-date` del ítem — es la fecha de actualización del **catálogo**, no la de bloqueo de la cotización.
+
+#### Botones refresh
+
+| Contexto | Modo bloqueados | Modo actualizados |
+|----------|-----------------|-------------------|
+| Refresh por fila (`.refresh-icon-btn`) | Habilitado si hay variación de precio | Oculto / deshabilitado |
+| Refresh en toolbar de selección | UI presente; integrado con `price-update-indicator.js` | Deshabilitado (mismo criterio que v4) |
+
+El refresh por fila actualiza el PVP del ítem al valor del catálogo (comportamiento mock en el prototipo). El refresh masivo desde la toolbar de selección **debe respetar el modo global**: solo tiene sentido operativo en modo bloqueados; en actualizados los precios ya reflejan el catálogo.
+
+#### Archivo JS
+
+Toda esta lógica vive en `js-scripts/price-update-indicator.js`: `togglePvpDisplay()`, `toggleRefreshButtons()`, `onPreciosModeChange()`, tooltips Bootstrap en íconos de advertencia.
+
 ---
 
 ## 5. Modal "Cargar cantidades" — contexto visual
