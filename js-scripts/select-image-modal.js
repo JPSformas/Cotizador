@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Original functionality
     document.getElementById('agregarCantidadDesktop').addEventListener('click', () => alert('Agregar nueva fila'));
-    document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', () => alert('Eliminar fila')));
     document.getElementById('saveItemCotization').addEventListener('click', () => alert('Guardado'));
     
     // Image storage and management

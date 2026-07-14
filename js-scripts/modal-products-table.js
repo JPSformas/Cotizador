@@ -120,6 +120,10 @@ document.addEventListener('DOMContentLoaded', function() {
         setupPriceCellEditors();
         updateTotal();
         updateSelectAllCheckbox();
+
+        if (window.TableEmptyState) {
+            window.TableEmptyState.refresh(tableBody.closest("[data-table-empty]"));
+        }
     }
     
     // Update select all checkbox state based on individual checkboxes

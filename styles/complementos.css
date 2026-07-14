@@ -222,7 +222,7 @@
 
 /* Styles for drag and drop functionality */
 .drag-column-header {
-  text-align: center;
+  text-align: right !important;
   vertical-align: middle;
 }
 

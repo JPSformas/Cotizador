@@ -16,6 +16,7 @@
   <link href="styles/sidebar.css" rel="stylesheet">
   <link href="styles/select-image-modal.css" rel="stylesheet">
   <link href="editItem.css" rel="stylesheet">
+  <link href="styles/table-empty-state.css" rel="stylesheet">
 </head>
 <body>
 
@@ -155,7 +156,7 @@
         </div>
 
         <!-- Tabla Desktop-->
-        <div class="table-responsive mb-2">
+        <div class="table-responsive mb-2" data-table-empty data-empty-type="quantities" data-empty-group="cantidades-item">
           <table class="table">
             <thead>
               <tr>
@@ -288,7 +289,7 @@
         </div>
 
         <!-- Cards Mobile -->
-        <div class="saved-quantities mb-3">
+        <div class="saved-quantities mb-3" data-table-empty-mobile data-empty-type="quantities" data-empty-group="cantidades-item">
           <div class="quantities-card">
             <div class="fieldLabel" >Cantidad: <span class="fieldValue">100</span></div>
             <div class="fieldLabel" >Precio Unitario: <span class="fieldValue">$ 8.455,00</span></div>
@@ -445,6 +446,7 @@
 
 <!-- Bootstrap bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js-scripts/table-empty-state.js"></script>
 <script src="js-scripts/select-image-modal.js"></script>
 <script src="js-scripts/financial-formatting.js"></script>
 <script src="js-scripts/cotizacion-edit-item-nav.js"></script>

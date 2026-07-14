@@ -167,6 +167,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (totalElement) {
             totalElement.textContent = formatCurrency(total);
         }
+
+        if (window.TableEmptyState) {
+            window.TableEmptyState.refresh(tableBody.closest("[data-table-empty]"));
+        }
     }
     
     // Populate confirmation step with form data
