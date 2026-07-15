@@ -20,7 +20,7 @@
                 rowSelector: "tr.item-container",
             },
             quantities: {
-                title: "No hay cantidades configuradas",
+                title: "",
                 hint: "Usá «Agregar cantidad» para definir precios por volumen.",
                 icon: "fa-layer-group",
                 rowSelector: "tbody > tr",
@@ -78,7 +78,8 @@
             const state = document.createElement("div");
             state.className = "table-empty-state";
             state.role = "status";
-            state.innerHTML = `<div class="table-empty-state__content"><i class="fas ${c.icon} table-empty-state__icon" aria-hidden="true"></i><p class="table-empty-state__title">${c.title}</p><p class="table-empty-state__hint">${c.hint}</p></div>`;
+            const titleHtml = c.title ? `<p class="table-empty-state__title">${c.title}</p>` : "";
+            state.innerHTML = `<div class="table-empty-state__content"><i class="fas ${c.icon} table-empty-state__icon" aria-hidden="true"></i>${titleHtml}<p class="table-empty-state__hint">${c.hint}</p></div>`;
 
             if (el.hasAttribute("data-table-empty")) {
                 applyLayout(state, el);
