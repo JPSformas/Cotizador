@@ -33,6 +33,15 @@ body {
 }
 
 /* Editable title styles */
+.quote-number {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6c757d;
+  margin: 0;
+  letter-spacing: 0.01em;
+  padding: 0rem 0.5rem;
+}
+
 .editable-title-wrapper {
   display: flex;
   align-items: center;
