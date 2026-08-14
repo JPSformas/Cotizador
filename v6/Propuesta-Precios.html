@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Propuesta - Configuración de Precios</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    background: #f5f5f4;
+    margin: 0;
+    padding: 32px;
+    padding-bottom: 96px;
+    color: #1a1a1a;
+  }
+  .card {
+    max-width: 1040px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e2e2e0;
+    border-radius: 10px;
+    padding: 28px 32px 36px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 20px;
+  }
+  h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    margin: 28px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .note {
+    background: #f0f6ff;
+    border: 1px solid #cfe1f7;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #1a4d80;
+    margin-bottom: 24px;
+  }
+  .radios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  .radios label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .top-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 8px;
+  }
+  .field {
+    flex: 1;
+    min-width: 140px;
+  }
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+  }
+  .field .box, .field input {
+    width: 100%;
+    border: 1px solid #d8d8d5;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 14px;
+    color: #333;
+    background: #fafaf9;
+  }
+  .field-hint {
+    font-size: 11px;
+    color: #666;
+    margin-top: 5px;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 12px;
+    color: #666;
+    margin: 4px 0 14px;
+  }
+
+  .logo-block {
+    background: #fafaf9;
+    border: 1px solid #ececea;
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .logo-config {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+  }
+  .logo-col {
+    flex: 1;
+    min-width: 180px;
+  }
+  .logo-col > label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  select, .stepper {
+    width: 100%;
+  }
+  select {
+    padding: 7px 8px;
+    border: 1px solid #d8d8d5;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #ffffff;
+  }
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .stepper button {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    border: 1px solid #d8d8d5;
+    background: #ffffff;
+    font-size: 15px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .stepper button:hover { background: #f0f0ee; }
+  .stepper span {
+    font-size: 15px;
+    font-weight: 600;
+    min-width: 16px;
+    text-align: center;
+  }
+  .metodo-desc {
+    font-size: 11px;
+    color: #666;
+    line-height: 1.4;
+    margin-top: 8px;
+  }
+
+  .logo-prices {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #ececea;
+  }
+  .logo-prices-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .logo-prices-sub {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 14px;
+    line-height: 1.45;
+  }
+  .logo-prices-sub strong {
+    color: #444;
+    font-weight: 600;
+  }
+  .logo-price-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+    gap: 12px;
+  }
+  .lp-tag {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #666660;
+    margin-bottom: 10px;
+  }
+  .lp-tag.base { color: #000085; }
+  .lp-tag.custom { color: #277326; }
+  .logo-price-item {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e6e6e3;
+    border-radius: 8px;
+    padding: 12px 14px 14px;
+    background: #ffffff;
+  }
+  .lp-qty {
+    font-size: 12px;
+    font-weight: 600;
+    color: #000085;
+    margin-bottom: 4px;
+  }
+  .lp-field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 6px;
+  }
+  .lp-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .lp-input-wrap > span {
+    font-size: 13px;
+    color: #666;
+  }
+  .lp-input-wrap input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #d8d8d5;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fafaf9;
+    color: #1a1a1a;
+  }
+  .logo-price-item.is-inherited .lp-input-wrap input {
+    color: #666;
+    background: #f3f3f1;
+  }
+  .lp-formula {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed #e0e0dc;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .lp-formula-row,
+  .lp-formula-total {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .lp-formula-op,
+  .lp-formula-eq {
+    flex-shrink: 0;
+    width: 12px;
+    font-weight: 700;
+    color: #666;
+    text-align: center;
+  }
+  .lp-zones {
+    color: #444;
+    font-weight: 500;
+  }
+  .lp-total {
+    color: #277326;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .lp-total-unit {
+    color: #666;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .table-wrap { overflow-x: auto; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+  }
+  th, td {
+    border: 1px solid #e2e2e0;
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: middle;
+  }
+  thead th {
+    font-weight: 600;
+    color: #1a1a1a;
+    background: #fbfbfa;
+  }
+  .grp-costos { background: #f5f6f2; }
+  .grp-ajustes { background: #f5f6f2; }
+  td.grp-ajustes { white-space: nowrap; position: relative; }
+  .cost-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .cost-line .lbl { color: #666; flex: 1; }
+  .cost-line .val { font-weight: 500; }
+  .computed { font-weight: 500; color: #555; }
+  .icon { width: 13px; height: 13px; display: block; }
+  .ico { display: inline-flex; vertical-align: -2px; color: #666; }
+  .lock-ico { color: #8f8f89; display: inline-flex; flex-shrink: 0; }
+  .flash-invalid {
+    box-shadow: 0 0 0 2px rgba(214,69,69,0.55) !important;
+    border-radius: 4px;
+  }
+  .prod-view {
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    padding: 1px 2px;
+    border-bottom: 1px dashed #b0b0aa;
+  }
+  .prod-view:hover { background: #f0f0ee; }
+  .prod-view.custom { color: #000085; font-weight: 600; }
+  .prod-view:focus-visible, .markup-view:focus-visible {
+    outline: 2px solid #000085;
+    outline-offset: 1px;
+  }
+  .prod-editwrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-weight: 500;
+  }
+  .prod-input {
+    width: 68px;
+    border: 1px solid #339933;
+    background: #ffffff;
+    font-size: 12px;
+    font-weight: 500;
+    color: #000085;
+    padding: 1px 5px;
+    text-align: right;
+    font-family: inherit;
+    border-radius: 4px;
+    box-shadow: 0 0 0 2px rgba(51,153,51,0.12);
+  }
+  .prod-edit {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #666;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    margin: -4px 0;
+    line-height: 1;
+    border-radius: 4px;
+  }
+  .prod-edit:hover { color: #1a1a1a; background: #ececea; }
+  .prod-diff {
+    font-size: 11px;
+    color: #666;
+    margin: 1px 0 3px;
+    white-space: nowrap;
+  }
+  .result { font-weight: 600; background: #eef3fb; }
+  th.grp-result { background: #e7eefa; }
+  .cantidad {
+    width: 72px;
+    padding: 6px 8px;
+    border: 1px solid #d8d8d5;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .pct {
+    width: 42px;
+    padding: 6px 6px;
+    border: 1px solid #d8d8d5;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .th-flex {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .pct-add, .pct-x {
+    border: 1px dashed #b5b5b0;
+    background: #ffffff;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1;
+    color: #666;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .pct-add:hover { border-color: #277326; color: #277326; background: #f4fbf0; }
+  .pct-x { border-style: solid; }
+  .pct-x:hover { color: #a33; border-color: #cc9999; background: #f6eeee; }
+  .pct-eff {
+    /* Absoluto para no desplazar el input: queda flotando debajo, alineado con él. */
+    position: absolute;
+    left: 10px;
+    top: calc(50% + 17px);
+    font-size: 11px;
+    color: #666;
+    margin: 0;
+  }
+
+  .markup-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .markup-view {
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    padding: 2px 4px;
+    border-bottom: 1px dashed #b0b0aa;
+  }
+  .markup-view:hover { background: #f0f0ee; }
+  .markup-view.custom { color: #000085; }
+  .markup-input {
+    width: 56px;
+    padding: 4px 8px;
+    border: 1px solid #339933;
+    border-radius: 6px;
+    font-size: 13px;
+    text-align: center;
+    background: #ffffff;
+    color: #000085;
+    font-weight: 600;
+    font-family: inherit;
+    box-shadow: 0 0 0 2px rgba(51,153,51,0.12);
+  }
+  .markup-edit {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #666;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    line-height: 1;
+    border-radius: 4px;
+  }
+  .markup-edit:hover { color: #1a1a1a; background: #ececea; }
+  .markup-hint {
+    font-size: 11px;
+    color: #666;
+    margin-top: 4px;
+  }
+  .pmargen-hint {
+    font-size: 11px;
+    font-weight: 500;
+    color: #277326;
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  .pmargen-hint.recargo { color: #b45309; }
+
+  .trash { text-align: center; }
+  .trash-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #666;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px;
+    border-radius: 4px;
+  }
+  .trash-btn:hover { color: #a33; background: #f6eeee; }
+  .trash-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+  .add-row {
+    margin-top: 12px;
+    padding: 9px 16px;
+    border: 1px dashed #339933;
+    border-radius: 6px;
+    background: #f4fbf0;
+    color: #277326;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .add-row:hover { background: #eaf6e1; }
+  .add-row:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-style: solid;
+  }
+
+  .footer-note {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #666;
+  }
+
+  .bottom-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    background: #ffffff;
+    border-top: 1px solid #e2e2e0;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.07);
+    padding: 12px 32px;
+  }
+  .bottom-bar-inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .nav-group {
+    display: flex;
+    gap: 10px;
+  }
+  .bar-btn {
+    padding: 9px 18px;
+    border: 1px solid #d8d8d5;
+    border-radius: 6px;
+    background: #ffffff;
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .bar-btn:hover { background: #f0f0ee; }
+  .save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #000085;
+    border-color: #000085;
+    color: #ffffff;
+    font-weight: 600;
+  }
+  .save-btn:hover { background: #000064; border-color: #000064; }
+  .save-btn .ico { color: inherit; }
+  .save-btn.saved { background: #339933; border-color: #339933; }
+
+  .tier-table { font-size: 12px; }
+  .tier-table th, .tier-table td { padding: 6px 10px; }
+
+  @media (max-width: 700px) {
+    body { padding: 12px; padding-bottom: 88px; }
+    .bottom-bar { padding: 10px 12px; }
+    .bar-btn { padding: 8px 10px; font-size: 12px; }
+    .card { padding: 16px; border-radius: 8px; }
+    h1 { font-size: 17px; }
+    .top-fields, .logo-config { flex-direction: column; gap: 16px; }
+    .field, .logo-col { min-width: 0; }
+    table { font-size: 11.5px; }
+    th, td { padding: 6px; }
+    .cost-line { font-size: 11px; }
+    .cantidad { width: 58px; }
+    .pct { width: 40px; }
+    .markup-input { width: 52px; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Configuración de Precios — propuesta</h1>
+
+  <div class="note">
+    El <strong>markup</strong> se aplica <strong>una sola vez</strong> sobre la suma de costos (producto + logo + setup) y sale automáticamente según el monto total de la operación, pero podés <strong>editarlo a mano</strong> en cada fila con el lápiz. El costo del logo se carga <strong>manualmente por ubicación para cada cantidad</strong> y se multiplica por la cantidad de ubicaciones. El costo del producto sale del PVP (÷ 1,65) y es <strong>editable por fila</strong> (por ej. si el vendedor consigue un descuento del proveedor).
+  </div>
+
+  <div class="radios" title="Modos de cotización — disponibles en la versión final">
+    <label><input type="radio" checked disabled> Con precio</label>
+    <label><input type="radio" disabled> Sin precio</label>
+    <label><input type="radio" disabled> Sin precio con stock</label>
+    <label><input type="radio" disabled> Con precio sin stock</label>
+  </div>
+
+  <div class="top-fields">
+    <div class="field">
+      <label>PVP</label>
+      <input type="text" id="pvpInput" value="625,70" oninput="updateAll()">
+      <div class="field-hint" id="costoProductoHint">Costo producto: $379,21 (PVP ÷ 1,65)</div>
+    </div>
+    <div class="field">
+      <label>Stock disponible</label>
+      <div class="box">33</div>
+    </div>
+    <div class="field">
+      <label>Setup logo</label>
+      <div class="box">$ 0</div>
+    </div>
+  </div>
+
+  <h2>Personalización de logo</h2>
+
+  <div class="logo-block">
+    <div class="logo-config">
+      <div class="logo-col">
+        <label>Cantidad de colores</label>
+        <select id="coloresSelect" onchange="onColoresChange()">
+          <option value="1">1 color</option>
+          <option value="2" selected>2 colores</option>
+          <option value="3">3 colores</option>
+          <option value="4">4 colores</option>
+          <option value="full">Full color</option>
+        </select>
+        <div class="metodo-desc">Seleccionable — no afecta el precio (por ahora).</div>
+      </div>
+
+      <div class="logo-col">
+        <label>Cantidad de ubicaciones</label>
+        <div class="stepper">
+          <button type="button" onclick="changeUbicaciones(-1)">−</button>
+          <span id="ubicacionesVal">1</span>
+          <button type="button" onclick="changeUbicaciones(1)">+</button>
+        </div>
+        <div class="metodo-desc">Multiplica el costo del logo por ubicación.</div>
+      </div>
+
+      <div class="logo-col">
+        <label>Método de impresión</label>
+        <select id="metodoSelect" onchange="updateAll()">
+          <option value="serigrafia">Serigrafía</option>
+          <option value="sublimacion">Sublimación / DTF</option>
+          <option value="bordado">Bordado</option>
+        </select>
+        <div class="metodo-desc" id="metodoDesc"></div>
+      </div>
+    </div>
+
+    <div class="logo-prices">
+      <label class="logo-prices-label">Costo de logo por cantidad</label>
+      <div class="logo-prices-sub">Definí el precio <strong>por ubicación</strong> en cada escalón. El total del logo por unidad es ese valor × la cantidad de ubicaciones.</div>
+      <div class="logo-price-grid" id="logoPriceGrid"></div>
+    </div>
+  </div>
+
+  <h2>Precios por volumen</h2>
+
+  <div class="legend">
+    <span><span class="ico" data-ico="lock"></span> valor automático</span>
+    <span><span class="ico" data-ico="edit"></span> editable con un click (producto y markup) · <span class="ico" data-ico="undo"></span> vuelve al automático</span>
+  </div>
+
+  <div class="table-wrap">
+  <table>
+    <thead id="tablaHead"></thead>
+    <tbody id="tablaBody"></tbody>
+  </table>
+  </div>
+
+  <button type="button" class="add-row" id="addRowBtn" onclick="addRow()">+ Agregar cantidad (máx. 5)</button>
+
+  <h2>Escala de markup según monto de la operación</h2>
+  <div class="table-wrap">
+  <table class="tier-table">
+    <thead>
+      <tr><th>Monto de la operación (costo total × cantidad)</th><th>Markup</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Hasta $1.000.000</td><td>1,40</td></tr>
+      <tr><td>$1.000.000 – $2.000.000</td><td>1,38</td></tr>
+      <tr><td>$2.000.000 – $5.000.000</td><td>1,35</td></tr>
+      <tr><td>$5.000.000 – $10.000.000</td><td>1,32</td></tr>
+      <tr><td>$10.000.000 – $20.000.000</td><td>1,30</td></tr>
+      <tr><td>$20.000.000 – $30.000.000</td><td>1,28</td></tr>
+      <tr><td>$30.000.000 – $50.000.000</td><td>1,27</td></tr>
+      <tr><td>$50.000.000 – $75.000.000</td><td>1,26</td></tr>
+      <tr><td>$75.000.000 – $100.000.000</td><td>1,255</td></tr>
+      <tr><td>Más de $100.000.000</td><td>1,25 (mínimo)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="footer-note">
+    Costo producto = PVP ÷ 1,65 (editable por fila) &nbsp;·&nbsp; Costo logo = costo por ubicación (según cantidad) × cantidad de ubicaciones &nbsp;·&nbsp;
+    Costo total = Producto + Logo + Setup &nbsp;·&nbsp; Markup = según escala (editable a mano), sobre costo total × cantidad &nbsp;·&nbsp; Precio c/markup = Costo total × Markup (el desc. automático mostrado al lado = 1 − markup usado ÷ sugerido) &nbsp;·&nbsp; Unitario = Precio c/markup × (1 − d₁)(1 − d₂)… × (1 + f₁)(1 + f₂)… — descuentos adicionales y financiaciones en cascada, hasta 3 de cada uno &nbsp;·&nbsp; Subtotal = Unitario × Cantidad
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <div class="bottom-bar-inner">
+    <div class="nav-group">
+      <button type="button" class="bar-btn" onclick="navItem(-1)">← Ítem anterior</button>
+      <button type="button" class="bar-btn" onclick="navItem(1)">Ítem siguiente →</button>
+    </div>
+    <button type="button" class="bar-btn save-btn" id="saveBtn" onclick="guardar()"><span class="ico" data-ico="save"></span> Guardar</button>
+  </div>
+</div>
+
+<script>
+  // Iconos SVG monocromos (heredan color vía currentColor).
+  var ICONS = {
+    lock:  '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.2"/><path d="M5.5 7V5.2a2.5 2.5 0 0 1 5 0V7"/></svg>',
+    edit:  '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.2 2.3l2.5 2.5L5.3 13.2l-3.2.9.9-3.2z"/></svg>',
+    undo:  '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5h6a3.5 3.5 0 1 1 0 7H6"/><path d="M6.5 3.5l-3 3 3 3"/></svg>',
+    trash: '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5h11M6 4.5V3h4v1.5M4.5 4.5l.6 9h5.8l.6-9"/></svg>',
+    save:  '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2.5h8.5L14 5v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-9.5a1 1 0 0 1 1-1z"/><path d="M5 2.5V6h5.5V2.5M4.5 14v-4.5h7V14"/></svg>',
+    check: '<svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>'
+  };
+
+  var METODOS = {
+    serigrafia:  { label: 'Serigrafía',        desc: 'Ideal para pocos colores y muchas unidades.' },
+    sublimacion: { label: 'Sublimación / DTF',  desc: 'Ideal para diseños complejos o degradados.' },
+    bordado:     { label: 'Bordado',            desc: 'Terminación premium.' }
+  };
+
+  // Cantidades a cotizar (fuente de verdad). logoUnit = costo de logo por ubicación para esa cantidad.
+  // logoUnit === null significa "heredar el precio de la primera cantidad".
+  // prodCost === null significa "usar el costo automático (PVP ÷ 1,65)".
+  // descs / fins: hasta 3 valores en cascada cada uno (se multiplican entre sí).
+  var quotes = [
+    { cantidad: 1500,  logoUnit: 500,  fins: [0], descs: [0], customMarkup: null, prodCost: null },
+    { cantidad: 4000,  logoUnit: null, fins: [0], descs: [0], customMarkup: null, prodCost: null },
+    { cantidad: 15000, logoUnit: null, fins: [8], descs: [0], customMarkup: null, prodCost: null },
+    { cantidad: 60000, logoUnit: null, fins: [0], descs: [0], customMarkup: null, prodCost: null }
+  ];
+  var MAX_PCT = 3;
+
+  var ubicacionesActual = 1;
+  var MAX_FILAS = 5;
+
+  function parseMoney(str) {
+    if (!str) return 0;
+    var n = parseFloat(String(str).replace(/\./g, '').replace(',', '.'));
+    return isNaN(n) ? 0 : n;
+  }
+  function parseNum(str) {
+    if (str === 0) return 0;
+    if (!str) return 0;
+    var n = parseFloat(String(str).replace(/\./g, '').replace(',', '.'));
+    return isNaN(n) ? 0 : n;
+  }
+  function money(n) {
+    return '$' + n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtQty(n) {
+    return n.toLocaleString('es-AR');
+  }
+  function fmtMarkup(m) {
+    return m.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+  }
+  function fmtPct(p) {
+    return (p * 100).toLocaleString('es-AR', { maximumFractionDigits: 1 }) + '%';
+  }
+  function fmtPlain(n) {
+    return n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function signPct(p) {
+    var v = p * 100;
+    var s = v > 0.05 ? '+' : (v < -0.05 ? '−' : '');
+    return s + Math.abs(v).toLocaleString('es-AR', { maximumFractionDigits: 1 }) + '%';
+  }
+  function inputVal(n) {
+    return Number.isInteger(n) ? String(n) : String(n).replace('.', ',');
+  }
+  function ubiLabel(n) {
+    return n + ' ' + (n > 1 ? 'ubicaciones' : 'ubicación');
+  }
+  function coloresNumerico(val) {
+    return val === 'full' ? 6 : parseInt(val, 10);
+  }
+  function metodoRecomendado(val) {
+    return (val === '4' || val === 'full') ? 'sublimacion' : 'serigrafia';
+  }
+  function onColoresChange() {
+    document.getElementById('metodoSelect').value = metodoRecomendado(document.getElementById('coloresSelect').value);
+    updateAll();
+  }
+  function changeUbicaciones(delta) {
+    ubicacionesActual = Math.min(4, Math.max(1, ubicacionesActual + delta));
+    document.getElementById('ubicacionesVal').textContent = ubicacionesActual;
+    updateAll();
+  }
+  function margenPorMonto(monto) {
+    if (monto < 1000000) return 0.40;
+    if (monto < 2000000) return 0.38;
+    if (monto < 5000000) return 0.35;
+    if (monto < 10000000) return 0.32;
+    if (monto < 20000000) return 0.30;
+    if (monto < 30000000) return 0.28;
+    if (monto < 50000000) return 0.27;
+    if (monto < 75000000) return 0.26;
+    if (monto < 100000000) return 0.255;
+    return 0.25;
+  }
+
+  // Lee lo tipeado en el DOM hacia el array de estado (para no perder valores al reconstruir).
+  function syncFromDom() {
+    quotes.forEach(function(q, i) {
+      var c = document.querySelector('.cantidad[data-i="' + i + '"]');
+      var l = document.querySelector('.lp-input[data-i="' + i + '"]');
+      var m = document.querySelector('.markup-input[data-i="' + i + '"]');
+      var p = document.querySelector('.prod-input[data-i="' + i + '"]');
+      if (c) q.cantidad = Math.max(0, parseNum(c.value));
+      q.descs = readPcts(i, 'desc-input', q.descs);
+      q.fins = readPcts(i, 'fin-input', q.fins);
+      if (l) { var raw = l.value.trim(); q.logoUnit = (raw === '') ? null : parseNum(raw); }
+      if (m && (q.mkEditing || q.customMarkup !== null)) {
+        var v = parseNum(m.value);
+        if (v) q.customMarkup = v;
+      }
+      if (p && (q.prodEditing || q.prodCost !== null)) {
+        var pv = parseMoney(p.value);
+        if (pv) q.prodCost = pv;
+      }
+    });
+  }
+
+  function refresh() {
+    syncFromDom();
+    updateAll();
+  }
+
+  // Feedback breve cuando una entrada inválida se descarta.
+  function flashInvalid(el) {
+    if (!el) return;
+    el.classList.add('flash-invalid');
+    setTimeout(function() { el.classList.remove('flash-invalid'); }, 900);
+  }
+
+  // Lee todos los % en cascada de una columna para la fila i, limitados a 0-100.
+  function readPcts(i, cls, prev) {
+    var els = document.querySelectorAll('.' + cls + '[data-i="' + i + '"]');
+    if (!els.length) return prev;
+    return [].map.call(els, function(el) {
+      return Math.min(100, Math.max(0, parseNum(el.value)));
+    });
+  }
+
+  // Al salir de un campo %, se normaliza al rango 0-100 en el propio input.
+  function clampPct(el, field) {
+    var i = +el.getAttribute('data-i');
+    var j = +el.getAttribute('data-j');
+    var raw = parseNum(el.value);
+    syncFromDom();
+    var val = quotes[i] ? quotes[i][field][j] : null;
+    if (val !== null && raw !== val) {
+      el.value = val;
+      flashInvalid(el);
+    }
+    updateAll();
+  }
+
+  // Columnas de % en cascada (globales a todas las cantidades): + agrega, × quita.
+  var nDesc = 1, nFin = 1;
+
+  function zeros(n) {
+    var a = [];
+    while (a.length < n) a.push(0);
+    return a;
+  }
+
+  function addCol(field) {
+    syncFromDom();
+    var n = (field === 'descs') ? nDesc : nFin;
+    if (n >= MAX_PCT) return;
+    if (field === 'descs') nDesc++; else nFin++;
+    quotes.forEach(function(q) { q[field].push(0); });
+    buildRows();
+  }
+
+  // Se borra en cascada: siempre la última columna (3ª, luego 2ª, hasta quedar la original).
+  function removeCol(field) {
+    syncFromDom();
+    var n = (field === 'descs') ? nDesc : nFin;
+    if (n <= 1) return;
+    if (field === 'descs') nDesc--; else nFin--;
+    quotes.forEach(function(q) { q[field].pop(); });
+    buildRows();
+  }
+
+  // El + y el × viven siempre en la última columna creada.
+  function headPctThs(field, label, shortLabel, n) {
+    var h = '';
+    for (var j = 0; j < n; j++) {
+      var last = j === n - 1;
+      h += '<th class="grp-ajustes"><span class="th-flex">' + (j === 0 ? label : shortLabel + ' ' + (j + 1))
+        + (last && n > 1 ? '<button type="button" class="pct-x" onclick="removeCol(\'' + field + '\')" title="Quitar esta columna" aria-label="Quitar columna">×</button>' : '')
+        + (last && n < MAX_PCT ? '<button type="button" class="pct-add" onclick="addCol(\'' + field + '\')" title="Agregar columna en cascada para todas las cantidades (máx. ' + MAX_PCT + ')" aria-label="Agregar columna">+</button>' : '')
+        + '</span></th>';
+    }
+    return h;
+  }
+
+  function pctTds(i, field, cls, effCls) {
+    var arr = quotes[i][field];
+    return arr.map(function(v, j) {
+      var last = j === arr.length - 1 && arr.length > 1;
+      return '<td class="grp-ajustes"><input class="pct ' + cls + '" type="text" data-i="' + i + '" data-j="' + j + '" value="' + v + '" oninput="refresh()" onblur="clampPct(this, \'' + field + '\')"> %'
+        + (last ? '<div class="pct-eff ' + effCls + '"></div>' : '')
+        + '</td>';
+    }).join('');
+  }
+
+  function buildRows() {
+    document.getElementById('tablaHead').innerHTML = '<tr>'
+      + '<th rowspan="2">Cantidad</th>'
+      + '<th class="grp-costos" colspan="2">Costos</th>'
+      + '<th colspan="2">Markup</th>'
+      + '<th class="grp-ajustes" colspan="' + (nDesc + nFin) + '">Ajustes comerciales</th>'
+      + '<th class="grp-result" colspan="2">Resultado</th>'
+      + '<th rowspan="2"></th>'
+      + '</tr><tr>'
+      + '<th class="grp-costos">Detalle</th>'
+      + '<th class="grp-costos">Total</th>'
+      + '<th>Markup</th>'
+      + '<th>Precio c/markup</th>'
+      + headPctThs('descs', 'Desc. adicional', 'Desc.', nDesc)
+      + headPctThs('fins', 'Financiación', 'Fin.', nFin)
+      + '<th class="grp-result">Unitario</th>'
+      + '<th class="grp-result">Subtotal</th>'
+      + '</tr>';
+    var grid = document.getElementById('logoPriceGrid');
+    grid.innerHTML = quotes.map(function(q, i) {
+      return '<div class="logo-price-item">'
+        + '<div class="lp-qty" data-i="' + i + '">—</div>'
+        + '<div class="lp-tag" data-i="' + i + '"></div>'
+        + '<label class="lp-field-label">Costo por ubicación</label>'
+        + '<div class="lp-input-wrap"><span>$</span>'
+        + '<input type="text" class="lp-input" data-i="' + i + '" value="' + (q.logoUnit != null ? inputVal(q.logoUnit) : '') + '" oninput="refresh()"></div>'
+        + '<div class="lp-formula">'
+        + '<div class="lp-formula-row">'
+        + '<span class="lp-formula-op" aria-hidden="true">×</span>'
+        + '<span class="lp-zones" data-i="' + i + '"></span>'
+        + '</div>'
+        + '<div class="lp-formula-total">'
+        + '<span class="lp-formula-eq" aria-hidden="true">=</span>'
+        + '<span class="lp-total" data-i="' + i + '"></span>'
+        + '<span class="lp-total-unit">/ unidad</span>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    var tb = document.getElementById('tablaBody');
+    tb.innerHTML = quotes.map(function(q, i) {
+      q.prodEditing = false;
+      q.mkEditing = false;
+      return '<tr data-i="' + i + '">'
+        + '<td><input class="cantidad" type="text" data-i="' + i + '" value="' + q.cantidad + '" oninput="refresh()"></td>'
+        + '<td class="grp-costos">'
+          + '<div class="cost-line prod-line">'
+            + '<button type="button" class="prod-edit" data-i="' + i + '" onclick="prodBtn(' + i + ')" title="Editar costo del producto" aria-label="Editar costo del producto">' + ICONS.edit + '</button>'
+            + '<span class="lbl">Producto</span>'
+            + '<span class="val prod-view" data-i="' + i + '" tabindex="0" role="button" onclick="editProd(' + i + ')" onkeydown="if(event.keyCode===13||event.keyCode===32){event.preventDefault();editProd(' + i + ');}" title="Click para editar">$0,00</span>'
+            + '<span class="prod-editwrap" data-i="' + i + '" style="display:none">$<input class="prod-input" type="text" data-i="' + i + '" oninput="refresh()" onblur="commitProd(' + i + ')" onkeydown="if(event.keyCode===13)this.blur()"></span>'
+          + '</div>'
+          + '<div class="prod-diff" data-i="' + i + '" style="display:none"></div>'
+          + '<div class="cost-line"><span class="lock-ico">' + ICONS.lock + '</span><span class="lbl">Logo</span><span class="val logo-cell">$0,00</span></div>'
+          + '<div class="cost-line"><span class="lock-ico">' + ICONS.lock + '</span><span class="lbl">Setup</span><span class="val setup-cell">$0,00</span></div>'
+        + '</td>'
+        + '<td class="grp-costos computed total-cell">$0,00</td>'
+        + '<td><div class="markup-cell">'
+          + '<span class="markup-view" data-i="' + i + '" tabindex="0" role="button" onclick="editMk(' + i + ')" onkeydown="if(event.keyCode===13||event.keyCode===32){event.preventDefault();editMk(' + i + ');}" title="Click para editar">—</span>'
+          + '<input class="markup-input" type="text" data-i="' + i + '" style="display:none" oninput="refresh()" onblur="commitMk(' + i + ')" onkeydown="if(event.keyCode===13)this.blur()">'
+          + '<button type="button" class="markup-edit" data-i="' + i + '" onclick="mkBtn(' + i + ')" title="Editar markup" aria-label="Editar markup">' + ICONS.edit + '</button>'
+        + '</div><div class="markup-hint">sugerido</div></td>'
+        + '<td class="computed"><div class="pmargen-cell">$0,00</div><div class="pmargen-hint" style="display:none"></div></td>'
+        + pctTds(i, 'descs', 'desc-input', 'desc-eff')
+        + pctTds(i, 'fins', 'fin-input', 'fin-eff')
+        + '<td class="result unit-cell">$0,00</td>'
+        + '<td class="result sub-cell">$0,00</td>'
+        + '<td class="trash"><button type="button" class="trash-btn" onclick="removeRow(' + i + ')" title="Eliminar cantidad" aria-label="Eliminar cantidad"' + (quotes.length <= 1 ? ' disabled' : '') + '>' + ICONS.trash + '</button></td>'
+        + '</tr>';
+    }).join('');
+
+    document.getElementById('addRowBtn').disabled = quotes.length >= MAX_FILAS;
+    updateAll();
+  }
+
+  function addRow() {
+    if (quotes.length >= MAX_FILAS) return;
+    syncFromDom();
+    quotes.push({ cantidad: 1000, logoUnit: null, fins: zeros(nFin), descs: zeros(nDesc), customMarkup: null, prodCost: null });
+    buildRows();
+  }
+
+  function removeRow(i) {
+    if (quotes.length <= 1) return;
+    syncFromDom();
+    quotes.splice(i, 1);
+    buildRows();
+  }
+
+  function autoProd() {
+    return parseMoney(document.getElementById('pvpInput').value) / 1.65;
+  }
+
+  // --- Costo de producto: click en el valor para editar; al salir queda "aceptado". ---
+  function editProd(i) {
+    if (quotes[i].prodEditing) return;
+    syncFromDom();
+    quotes[i].prodEditing = true;
+    var inp = document.querySelector('.prod-input[data-i="' + i + '"]');
+    inp.value = fmtPlain(quotes[i].prodCost !== null ? quotes[i].prodCost : autoProd());
+    updateAll();
+    inp.focus();
+    inp.select();
+  }
+  function commitProd(i) {
+    var q = quotes[i];
+    q.prodEditing = false;
+    var inp = document.querySelector('.prod-input[data-i="' + i + '"]');
+    var raw = inp.value.trim();
+    var v = parseMoney(raw);
+    // vacío, inválido o igual al automático → vuelve a automático
+    q.prodCost = (v > 0 && Math.abs(v - autoProd()) > 0.005) ? v : null;
+    updateAll();
+    if (raw !== '' && v <= 0) flashInvalid(document.querySelector('.prod-view[data-i="' + i + '"]'));
+  }
+  function prodBtn(i) {
+    if (quotes[i].prodEditing || quotes[i].prodCost !== null) {
+      quotes[i].prodEditing = false;
+      quotes[i].prodCost = null;
+      updateAll();
+    } else {
+      editProd(i);
+    }
+  }
+
+  // --- Markup: mismo patrón. ---
+  function editMk(i) {
+    if (quotes[i].mkEditing) return;
+    syncFromDom();
+    quotes[i].mkEditing = true;
+    var tr = document.querySelector('#tablaBody tr[data-i="' + i + '"]');
+    var inp = tr.querySelector('.markup-input');
+    var sug = parseFloat(tr.dataset.sug) || 1.4;
+    inp.value = fmtMarkup(quotes[i].customMarkup !== null ? quotes[i].customMarkup : sug);
+    updateAll();
+    inp.focus();
+    inp.select();
+  }
+  function commitMk(i) {
+    var q = quotes[i];
+    q.mkEditing = false;
+    var tr = document.querySelector('#tablaBody tr[data-i="' + i + '"]');
+    var raw = tr.querySelector('.markup-input').value.trim();
+    var v = parseNum(raw);
+    var sug = parseFloat(tr.dataset.sug) || 0;
+    q.customMarkup = (v > 0 && Math.abs(v - sug) > 0.0005) ? v : null;
+    updateAll();
+    if (raw !== '' && v <= 0) flashInvalid(tr.querySelector('.markup-view'));
+  }
+  function mkBtn(i) {
+    if (quotes[i].mkEditing || quotes[i].customMarkup !== null) {
+      quotes[i].mkEditing = false;
+      quotes[i].customMarkup = null;
+      updateAll();
+    } else {
+      editMk(i);
+    }
+  }
+
+  function updateAll() {
+    var pvp = parseMoney(document.getElementById('pvpInput').value);
+    var costoProducto = pvp / 1.65;
+    document.getElementById('costoProductoHint').textContent = 'Costo producto: ' + money(costoProducto) + ' (PVP ÷ 1,65)';
+
+    var ubic = ubicacionesActual;
+    var metodo = METODOS[document.getElementById('metodoSelect').value];
+    document.getElementById('metodoDesc').textContent = metodo.desc + ' (referencia, no afecta el precio)';
+
+    var setup = 0;
+    var baseLogo = (quotes[0] && quotes[0].logoUnit != null) ? quotes[0].logoUnit : 0;
+
+    quotes.forEach(function(q, i) {
+      var heredado = (i > 0 && q.logoUnit == null);
+      var logoUnitEff = (q.logoUnit != null) ? q.logoUnit : baseLogo;
+      var costoLogo = logoUnitEff * ubic;
+
+      var itemEl = document.querySelectorAll('#logoPriceGrid .logo-price-item')[i];
+      var lblEl = document.querySelector('.lp-qty[data-i="' + i + '"]');
+      var tagEl = document.querySelector('.lp-tag[data-i="' + i + '"]');
+      var inpEl = document.querySelector('.lp-input[data-i="' + i + '"]');
+      var zonesEl = document.querySelector('.lp-zones[data-i="' + i + '"]');
+      var totalEl = document.querySelector('.lp-total[data-i="' + i + '"]');
+      if (itemEl) itemEl.classList.toggle('is-inherited', heredado);
+      if (lblEl) lblEl.textContent = 'Cantidad ' + fmtQty(q.cantidad) + ' u';
+      if (tagEl) {
+        if (i === 0) { tagEl.textContent = 'Precio base'; tagEl.className = 'lp-tag base'; }
+        else if (heredado) { tagEl.textContent = 'Heredado del base'; tagEl.className = 'lp-tag'; }
+        else { tagEl.textContent = 'Personalizado'; tagEl.className = 'lp-tag custom'; }
+      }
+      if (inpEl) inpEl.placeholder = (i > 0) ? inputVal(baseLogo) : '';
+      if (zonesEl) zonesEl.textContent = ubiLabel(ubic);
+      if (totalEl) totalEl.textContent = money(costoLogo);
+
+      var tr = document.querySelector('#tablaBody tr[data-i="' + i + '"]');
+      if (!tr) return;
+
+      var cantidad = q.cantidad;
+      // Cascada: los descuentos y financiaciones se multiplican entre sí.
+      var descFactor = 1, finFactor = 1;
+      q.descs.forEach(function(d) { descFactor *= (1 - d / 100); });
+      q.fins.forEach(function(f) { finFactor *= (1 + f / 100); });
+
+      // Costo de producto: automático (PVP ÷ 1,65) o editado a mano en la fila.
+      var prodCustom = q.prodCost !== null;
+      var prodEditing = !!q.prodEditing;
+      var prodEff = prodCustom ? (q.prodCost || costoProducto) : costoProducto;
+      var pView = tr.querySelector('.prod-view');
+      var pWrap = tr.querySelector('.prod-editwrap');
+      var pEdit = tr.querySelector('.prod-edit');
+      var pDiff = tr.querySelector('.prod-diff');
+      if (prodEditing) {
+        pView.style.display = 'none';
+        pWrap.style.display = '';
+        pEdit.innerHTML = ICONS.undo;
+        pEdit.title = 'Volver al costo automático';
+      } else {
+        pView.style.display = '';
+        pWrap.style.display = 'none';
+        pView.textContent = money(prodEff);
+        pView.className = 'val prod-view' + (prodCustom ? ' custom' : '');
+        pEdit.innerHTML = prodCustom ? ICONS.undo : ICONS.edit;
+        pEdit.title = prodCustom ? 'Volver al costo automático' : 'Editar costo del producto';
+      }
+      pEdit.setAttribute('aria-label', pEdit.title);
+      if (prodCustom || prodEditing) {
+        var diff = costoProducto > 0 ? (prodEff / costoProducto - 1) : 0;
+        pDiff.textContent = 'Original ' + money(costoProducto) + ' (' + signPct(diff) + ')';
+        pDiff.style.display = '';
+      } else {
+        pDiff.textContent = '';
+        pDiff.style.display = 'none';
+      }
+
+      var costoTotal = prodEff + costoLogo + setup;
+      var montoOperacion = costoTotal * cantidad;
+      var sugMarkup = 1 + margenPorMonto(montoOperacion);
+
+      tr.dataset.sug = sugMarkup;
+
+      var mkView = tr.querySelector('.markup-view');
+      var mkInp = tr.querySelector('.markup-input');
+      var mkBtnEl = tr.querySelector('.markup-edit');
+      var custom = q.customMarkup !== null;
+      var mkEditing = !!q.mkEditing;
+      var markup = custom ? (q.customMarkup || sugMarkup) : sugMarkup;
+      if (mkEditing) {
+        mkView.style.display = 'none';
+        mkInp.style.display = '';
+        mkBtnEl.innerHTML = ICONS.undo;
+        mkBtnEl.title = 'Volver al markup sugerido';
+      } else {
+        mkView.style.display = '';
+        mkInp.style.display = 'none';
+        mkView.textContent = fmtMarkup(markup);
+        mkView.className = 'markup-view' + (custom ? ' custom' : '');
+        mkBtnEl.innerHTML = custom ? ICONS.undo : ICONS.edit;
+        mkBtnEl.title = custom ? 'Volver al markup sugerido' : 'Editar markup';
+      }
+      mkBtnEl.setAttribute('aria-label', mkBtnEl.title);
+
+      var descAuto = custom ? (1 - markup / sugMarkup) : 0;
+      var precioConMarkup = costoTotal * markup;
+      var unitario = precioConMarkup * descFactor * finFactor;
+      var subtotal = unitario * cantidad;
+
+      var dEff = tr.querySelector('.desc-eff');
+      if (dEff) {
+        dEff.textContent = 'efect. ' + fmtPct(1 - descFactor);
+        dEff.title = q.descs.map(function(d) { return d + '%'; }).join(' + ') + ' en cascada';
+      }
+      var fEff = tr.querySelector('.fin-eff');
+      if (fEff) {
+        fEff.textContent = 'efect. ' + fmtPct(finFactor - 1);
+        fEff.title = q.fins.map(function(f) { return f + '%'; }).join(' + ') + ' en cascada';
+      }
+
+      tr.querySelector('.logo-cell').textContent = money(costoLogo);
+      tr.querySelector('.setup-cell').textContent = money(setup);
+      tr.querySelector('.total-cell').textContent = money(costoTotal);
+      tr.querySelector('.markup-hint').textContent = (custom || mkEditing) ? ('sugerido ' + fmtMarkup(sugMarkup)) : 'sugerido';
+
+      var pmHint = tr.querySelector('.pmargen-hint');
+      if (custom && Math.abs(descAuto) >= 0.0005) {
+        if (descAuto > 0) {
+          pmHint.textContent = '−' + fmtPct(descAuto);
+          pmHint.className = 'pmargen-hint';
+          pmHint.title = 'Descuento equivalente frente al markup sugerido (' + fmtMarkup(sugMarkup) + ')';
+        } else {
+          pmHint.textContent = '+' + fmtPct(-descAuto);
+          pmHint.className = 'pmargen-hint recargo';
+          pmHint.title = 'Recargo frente al markup sugerido (' + fmtMarkup(sugMarkup) + ')';
+        }
+        pmHint.style.display = '';
+      } else {
+        pmHint.textContent = '';
+        pmHint.style.display = 'none';
+      }
+
+      tr.querySelector('.pmargen-cell').textContent = money(precioConMarkup);
+      tr.querySelector('.unit-cell').textContent = money(unitario);
+      tr.querySelector('.sub-cell').textContent = money(subtotal);
+    });
+  }
+
+  // Barra inferior: navegación entre ítems (demo) y guardar.
+  function navItem(dir) {
+    // En la app real acá se cambia de ítem de la cotización; en esta propuesta es demostrativo.
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function guardar() {
+    var btn = document.getElementById('saveBtn');
+    btn.classList.add('saved');
+    btn.innerHTML = '<span class="ico">' + ICONS.check + '</span> Guardado';
+    setTimeout(function() {
+      btn.classList.remove('saved');
+      btn.innerHTML = '<span class="ico">' + ICONS.save + '</span> Guardar';
+    }, 1600);
+  }
+
+  // Rellena los iconos declarados en el HTML estático.
+  document.querySelectorAll('[data-ico]').forEach(function(el) {
+    el.innerHTML = ICONS[el.getAttribute('data-ico')] || '';
+  });
+
+  buildRows();
+</script>
+</body>
+</html>

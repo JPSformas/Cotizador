@@ -1,0 +1,36 @@
+/* --- Header --- */
+.avatar-circle {
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    background:#8ee021;
+    color:#000;
+    font-size:1.1rem;
+}
+.cart-count {
+    font-size:.7rem;
+    padding:.25em .6em;
+    border-radius:50%; 
+    background-color: #8ee021
+}
+.userDataName {
+    color: #8ee021; 
+    font-weight: 600;
+}
+.userDataName-mobile {
+    font-weight:600;
+    font-size:1.1rem;
+}
+/* Coloca esto después de Bootstrap */
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: #8ee021; /* nuevo color */
+}
+
+@media (max-width: 991px) {
+  .navbar-brand {
+    margin-left: 20px;
+  }
+}

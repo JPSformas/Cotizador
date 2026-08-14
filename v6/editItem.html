@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Configuración de Producto</title>
+  
+  <!-- Bootstrap 5 & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
+ 
+  <link rel="stylesheet" href="Fonts/fonts.css">
+  <link rel="stylesheet" href="Fonts/font-icons.css">
+  <link href="styles/nuevo-header.css" rel="stylesheet">
+  <link href="styles/complementos.css" rel="stylesheet">
+  <link href="styles/sidebar.css" rel="stylesheet">
+  <link href="styles/select-image-modal.css" rel="stylesheet">
+  <link href="styles/editItem.css" rel="stylesheet">
+  <link href="styles/table-empty-state.css" rel="stylesheet">
+  <link href="styles/pricing-table.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ==========  HEADER GLOBAL  ========== -->
+<header class="navbar navbar-dark bg-black py-3">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="https://formas.shop/app">
+      <img src="IMG/Logo Formas.shop 2025-02.png" alt="Logo" style="max-width:200px">
+    </a>
+
+    <!-- Iconos derecha -->
+    <div class="d-flex align-items-center ms-auto">
+      <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="avatar-circle d-inline-flex align-items-center justify-content-center me-2">
+                <i class="fa-solid fa-user"></i>
+              </span>
+            <span class="d-none d-md-inline userDataName">Invitado</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+            <span class="dropdown-item-text userDataName-mobile">Invitado</span>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="/app/order/list">Mis pedidos</a></li>
+            <li><a class="dropdown-item" href="/app/order/repeat">Últimas compras</a></li>
+            <li><a class="dropdown-item" href="/app/order-cotization">Mis cotizaciones</a></li>
+            <li><a class="dropdown-item" href="/logout">Salir</a></li>
+        </ul>
+      </div>
+      <a href="/app/order" class="btn text-white position-relative"><i class="fas fa-cart-shopping fa-xl"></i>
+        <span class="position-absolute top-10 start-90 translate-middle  cart-count">2</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <a href="detalle-cotizacion.html" class="back-link">
+        <i class="fas fa-chevron-left"></i> Volver a detalle de cotización
+    </a>
+    <div class="d-flex align-items-center gap-2">
+      <button type="button" class="tf-btn" id="saveItemCotization" data-pricing-save aria-label="Guardar ítem de cotización">
+        <span class="text d-none d-lg-inline">Guardar ítem de cotización</span>
+        <i class="icon fas fa-save" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+  
+  <!-- ==========  CONTENIDO PRINCIPAL  ========== -->
+  <form>
+    <div class="card">
+      <!-- Información Básica -->
+      <div class="card-section">
+        <h1 class="h4 mb-0 fw-bold mb-4">Configuración de Producto</h1>
+        <h2 class="h5 mb-4">Información Básica</h2>
+        <div class="row">
+          <div class="col-md-3  mb-3 mb-md-0">
+            <div class="product-image mb-3"><img src="IMG/placeholder3.jpg" class="product-img" id="selectedProductImage"></div>
+            <button type="button" class="btn btn-outline-secondary w-100" id="selectImageBtn"><i class="fas fa-image me-1"></i>Seleccionar imagen</button>
+          </div>
+          <div class="col-md-9">
+            <div class="row mb-3">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label for="nombreVariante" class="form-label">Nombre del producto + Variante</label>
+                <input type="text" id="nombreVariante" name="nombreVariante" class="form-control" value="Gorro Tiger - Gris claro">
+              </div>
+              <div class="col-md-6">
+                <label for="SKU" class="form-label">SKU</label>
+                <input type="text" id="SKU" name="SKU" class="form-control" value="ZEC_20037000001D55D55D63" disabled>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="tiempoProduccion" class="form-label">Tiempo de produccion</label>
+                <input type="text" id="tiempoProduccion" name="tiempoProduccion" class="form-control" placeholder="10-12 días hábiles">
+              </div>
+              <div class="col-md-6">
+                <label for="informacionEnvio" class="form-label">Información de envío</label>
+                <input type="text" id="informacionEnvio" name="informacionEnvio" class="form-control" placeholder="" value="">
+              </div>
+            </div>
+            <label for="Descripcion" class="form-label">Descripción del producto</label>
+            <textarea id="Descripcion" name="Descripcion" class="form-control" rows="3">Gorro de 6 paneles realizado en Cotton Flex (microfibra). Cierre velcro tipo Shiny Soft y sticker metalizado en visera. Slazeneger</textarea>            
+          </div>
+        </div>
+      </div>
+
+      <!-- Configuración de precios -->
+      <div class="card-section">
+        <div class="d-inline-flex align-items-center gap-2 mb-4">
+          <h2 class="h5 mb-0">Configuración de Precios</h2>
+          <button type="button" class="refresh-icon-btn" id="refreshBtn" data-pricing-refresh title="Actualizar">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+        <div class="mb-4">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="priceOption" id="printOptionPrice" value="conPrecio" checked>
+            <label class="form-check-label" for="printOptionPrice">Con precio</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="priceOption" id="printOptionNoPrice" value="sinPrecio">
+            <label class="form-check-label" for="printOptionNoPrice">Sin precio</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="priceOption" id="printOptionNoPrice&Stock" value="sinPrecio&Stock">
+            <label class="form-check-label" for="printOptionNoPrice">Sin precio con stock</label>
+          </div>
+        </div>
+        <div class="row mb-4 ">
+          <div class="col-md-4 mb-3 mb-md-0" id="configPrecios">
+            <label for="configPreciosSelect" class="form-label">Configuración de precios</label>
+            <select class="form-select" id="configPreciosSelect">
+                <option value="conPrecio" selected>Con precio</option>
+                <option value="sinPrecio">Sin precio</option>
+                <option value="sinPrecio&Stock">Sin precio con stock</option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-3 mb-md-0">
+            <label for="PVP" class="form-label">PVP</label>
+            <div class="pvp-input-row">
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <button type="button" class="icon-button"><i class="fas fa-edit"></i></button>
+                <input type="text" inputmode="numeric" id="PVP" name="PVP" class="form-control form-control-sm" value="12.500,00" data-financial-format="true" data-pricing-pvp disabled>
+              </div>
+              <div class="pvp-status">
+                <i class="fas fa-triangle-exclamation pvp-warning-icon" id="pvpWarningIcon" aria-hidden="true"></i>
+                <i class="fas fa-check-circle pvp-check-icon" id="pvpCheckIcon" aria-hidden="true" style="display: none;"></i>
+              </div>
+            </div>
+            <div class="pvp-actual mt-2" id="pvpActualIndicator">
+              <span class="detail-label">PVP Actual:</span>
+              <span class="detail-value" id="pvpActualValue">$11.800,00</span>
+              <span class="price-change-indicator price-down" id="pvpChangeIndicator">
+                <i class="fas fa-arrow-down"></i>
+                <span class="price-change-percent" id="pvpChangePercent">-5,6%</span>
+              </span>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3 mb-md-0">
+            <label for="stockDisponible" class="form-label">Stock disponible</label>
+            <input type="number" inputmode="numeric" id="stockDisponible" name="stockDisponible" class="form-control form-control-sm" value="2376" disabled>
+          </div>
+          <div class="col-md-3 mb-3 mb-md-0">
+            <label for="minimoBonificacion" class="form-label">Mínimo para logo gratis</label>
+            <div class="input-with-icon">
+              <input type="number" inputmode="numeric" id="minimoBonificacion" name="minimoBonificacion" class="form-control form-control-sm" value="200">
+              <button type="button" class="icon-button"><i class="fas fa-edit"></i></button>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label for="setupLogo" class="form-label">Setup logo</label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <button type="button" class="icon-button"><i class="fas fa-edit"></i></button>
+              <input type="text" inputmode="numeric" id="setupLogo" name="setupLogo" class="form-control form-control-sm" value="30.000,00" data-financial-format="true" data-pricing-setup>
+              
+            </div>  
+          </div>
+        </div>
+
+        <!-- ==========  MOTOR DE PRECIOS POR VOLUMEN  ========== -->
+        <div class="pricing-engine"
+             data-pricing-engine
+             data-has-logo="true"
+             data-cost-divisor="1.65"
+             data-setup-mode="prorated">
+
+          <!-- Estado inicial de las cantidades a cotizar -->
+          <script type="application/json" data-role="pricing-quotes">
+          [
+            { "cantidad": 50,  "logoUnit": 500,  "descs": [0], "fins": [0], "customMarkup": null, "prodCost": null },
+            { "cantidad": 100,  "logoUnit": null, "descs": [0], "fins": [0], "customMarkup": null, "prodCost": null },
+            { "cantidad": 200, "logoUnit": null, "descs": [0], "fins": [8], "customMarkup": null, "prodCost": null },
+            { "cantidad": 500, "logoUnit": null, "descs": [0], "fins": [0], "customMarkup": null, "prodCost": null }
+          ]
+          </script>
+
+          <div class="pe-cost-hint" data-role="costo-producto-hint"></div>
+
+          <div class="pe-subhead">Personalización de logo</div>
+          <div class="logo-block">
+            <div class="logo-config">
+              <div class="logo-col">
+                <label>Cantidad de colores</label>
+                <select class="form-select" data-role="colores">
+                  <option value="1">1 color</option>
+                  <option value="2" selected>2 colores</option>
+                  <option value="3">3 colores</option>
+                  <option value="4">4 colores</option>
+                  <option value="full">Full color</option>
+                </select>
+                <div class="metodo-desc">Seleccionable — no afecta el precio (por ahora).</div>
+              </div>
+
+              <div class="logo-col">
+                <label>Cantidad de ubicaciones</label>
+                <div class="stepper">
+                  <button type="button" data-action="ubic-dec" aria-label="Quitar ubicación">−</button>
+                  <span data-role="ubic-val">1</span>
+                  <button type="button" data-action="ubic-inc" aria-label="Agregar ubicación">+</button>
+                </div>
+                <div class="metodo-desc">Multiplica el costo del logo por ubicación.</div>
+              </div>
+
+              <div class="logo-col">
+                <label>Método de impresión</label>
+                <select class="form-select" data-role="metodo">
+                  <option value="serigrafia">Serigrafía</option>
+                  <option value="sublimacion">Sublimación / DTF</option>
+                  <option value="bordado">Bordado</option>
+                </select>
+                <div class="metodo-desc" data-role="metodo-desc"></div>
+              </div>
+            </div>
+
+            <div class="logo-prices">
+              <label class="logo-prices-label">Costo de logo por cantidad</label>
+              <div class="logo-prices-sub">Definí el precio <strong>por ubicación</strong> en cada escalón. El total del logo por unidad es ese valor × la cantidad de ubicaciones.</div>
+              <div class="logo-price-grid" data-role="logo-grid"></div>
+            </div>
+          </div>
+
+          <div class="pe-subhead">Precios por volumen</div>
+
+          <div class="pe-legend">
+            <span><i class="fas fa-lock" aria-hidden="true"></i> valor automático</span>
+            <span><i class="fas fa-pen" aria-hidden="true"></i> editable con un click (producto y markup) · <i class="fas fa-rotate-left" aria-hidden="true"></i> vuelve al automático</span>
+          </div>
+
+          <div class="table-wrap">
+            <table class="pe-table">
+              <thead data-role="pricing-head"></thead>
+              <tbody data-role="pricing-body"></tbody>
+            </table>
+          </div>
+
+          <button type="button" class="add-row" data-action="add-row">+ Agregar cantidad (máx. 5)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navegación entre ítems (orden de tabla en detalle-cotizacion) -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 gap-3">
+      <button type="button" class="tf-btn" id="save&prevItemCotization" aria-label="Guardar y volver al ítem anterior">
+        <i class="icon fas fa-chevron-left" aria-hidden="true"></i>
+        <span class="text d-none d-lg-inline">Ítem anterior</span>
+      </button>
+      <button type="button" class="tf-btn" id="save&nextItemCotization" aria-label="Guardar y avanzar al ítem siguiente">
+        <span class="text d-none d-lg-inline">Ítem siguiente</span>
+        <i class="icon fas fa-chevron-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  </form>
+
+  <!-- Image Selection Modal -->
+  <div class="modal-backdrop" id="imageModal" style="display: none;">
+    <div class="image-modal">
+      <div class="modal-header">
+        <h5>Seleccionar Imagen</h5>
+        <div class="modal-header-actions">
+          <button type="button" class="close-btn" id="closeModalBtn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="modal-body">
+        <div class="image-section">
+          <h6>Imágenes subidas</h6>
+          <div class="image-grid" id="uploadedImagesGrid">
+            <!-- Uploaded images will be added here dynamically with delete buttons -->
+            <div class="upload-area">
+              <div class="upload-content">
+                <i class="fas fa-upload"></i>
+                <p>Arrastrá y soltá para agregar imágenes</p>
+                <label class="upload-btn">
+                  Examinar
+                  <input type="file" hidden id="imageUploadInput" accept="image/*" multiple>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="image-section">
+          <h6>Imágenes de producto</h6>
+          <div class="image-grid" id="productImagesGrid">
+            <div class="image-item" data-image="IMG/placeholder3SinLogoFrente.jpg" data-type="product" data-id="product-1">
+              <img src="IMG/placeholder3SinLogoFrente.jpg" alt="Product image 1">
+            </div>
+            <div class="image-item" data-image="IMG/placeholder3SinLogoLateral1.jpg" data-type="product" data-id="product-2">
+              <img src="IMG/placeholder3SinLogoLateral1.jpg" alt="Product image 2">
+            </div>
+            <div class="image-item" data-image="IMG/placeholder3SinLogoDorso.jpg" data-type="product" data-id="product-3">
+              <img src="IMG/placeholder3SinLogoDorso.jpg" alt="Product image 3">
+            </div>
+            <div class="image-item" data-image="IMG/placeholder3SinLogoLatera2.jpg" data-type="product" data-id="product-4">
+              <img src="IMG/placeholder3SinLogoLateral2.jpg" alt="Product image 3">
+            </div>
+          </div>
+        </div>
+        
+        <div class="image-section">
+          <h6>Imágenes personalizadas</h6>
+          <div class="image-grid" id="zakekeImagesGrid">
+            <div class="image-item" data-image="IMG/placeholder3.jpg" data-type="zakeke" data-id="zakeke-1">
+              <img src="IMG/placeholder3.jpg" alt="Zakeke image 1">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Bootstrap bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js-scripts/table-empty-state.js"></script>
+<script src="js-scripts/select-image-modal.js"></script>
+<script src="js-scripts/financial-formatting.js"></script>
+<script src="js-scripts/price-update-indicator.js"></script>
+<script src="js-scripts/pricing-engine.js"></script>
+<script src="js-scripts/cotizacion-edit-item-nav.js"></script>
+</body>
+</html>

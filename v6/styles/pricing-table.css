@@ -1,0 +1,510 @@
+/*
+ * Pricing engine — volume pricing table with logo cost buildup, tier markup,
+ * inline editable product cost / markup, and cascading discounts & financings.
+ *
+ * Ported from the standalone Propuesta-Precios.html prototype and re-skinned to
+ * the project conventions (Poppins, brand tokens, FontAwesome, 8px radii).
+ *
+ * Everything is scoped under .pricing-engine to avoid clashing with Bootstrap
+ * global selectors (.table, .result, .field, etc.).
+ */
+
+.pricing-engine {
+  /* Reuse the project palette (complementos.css :root) instead of forking colors. */
+  --pe-brand: var(--brand-secondary);
+  --pe-green: var(--success);
+  --pe-green-border: var(--success);
+  --pe-critical: var(--critical);
+  --pe-line: var(--line);
+  --pe-line-soft: #ececea;
+  --pe-surface: #fafaf9;
+  --pe-muted: var(--secondary);
+  color: #1a1a1a;
+}
+
+.pricing-engine * { box-sizing: border-box; }
+
+/* --- Section headings inside the engine --- */
+.pricing-engine .pe-subhead {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  margin: 24px 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.pricing-engine .pe-note {
+  background: #f0f6ff;
+  border: 1px solid #cfe1f7;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #1a4d80;
+  margin-bottom: 20px;
+}
+
+.pricing-engine .pe-cost-hint {
+  font-size: 12px;
+  color: var(--pe-muted);
+  margin: 0 0 16px;
+}
+.pricing-engine .pe-cost-hint strong { color: #1a1a1a; }
+
+.pricing-engine .pe-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 12px;
+  color: var(--pe-muted);
+  margin: 4px 0 14px;
+}
+.pricing-engine .pe-legend i { width: 13px; text-align: center; color: var(--pe-muted); }
+
+/* --- Logo personalization block --- */
+.pricing-engine .logo-block {
+  background: var(--pe-surface);
+  border: 1px solid var(--pe-line-soft);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+.pricing-engine .logo-config {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+.pricing-engine .logo-col {
+  flex: 1;
+  min-width: 180px;
+}
+.pricing-engine .logo-col > label {
+  display: block;
+  font-size: 12px;
+  color: var(--pe-muted);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.pricing-engine .metodo-desc {
+  font-size: 11px;
+  color: var(--pe-muted);
+  line-height: 1.4;
+  margin-top: 8px;
+}
+
+/* Stepper for ubicaciones */
+.pricing-engine .stepper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pricing-engine .stepper button {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 1px solid #d8d8d5;
+  background: #ffffff;
+  font-size: 15px;
+  cursor: pointer;
+  line-height: 1;
+}
+.pricing-engine .stepper button:hover { background: #f0f0ee; }
+.pricing-engine .stepper button:disabled { opacity: .4; cursor: not-allowed; }
+.pricing-engine .stepper span {
+  font-size: 15px;
+  font-weight: 600;
+  min-width: 16px;
+  text-align: center;
+}
+
+/* --- Per-quantity logo cost grid --- */
+.pricing-engine .logo-prices {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pe-line-soft);
+}
+.pricing-engine .logo-prices-label {
+  display: block;
+  font-size: 12px;
+  color: var(--pe-muted);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.pricing-engine .logo-prices-sub {
+  font-size: 11px;
+  color: var(--pe-muted);
+  margin-bottom: 14px;
+  line-height: 1.45;
+}
+.pricing-engine .logo-prices-sub strong {
+  color: #444;
+  font-weight: 600;
+}
+.pricing-engine .logo-price-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 12px;
+}
+.pricing-engine .logo-price-item {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e6e6e3;
+  border-radius: 8px;
+  padding: 12px 14px 14px;
+  background: #ffffff;
+}
+.pricing-engine .lp-qty {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pe-brand);
+  margin-bottom: 4px;
+}
+.pricing-engine .lp-tag {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #666660;
+  margin-bottom: 10px;
+}
+.pricing-engine .lp-tag.base { color: var(--pe-brand); }
+.pricing-engine .lp-tag.custom { color: var(--pe-green); }
+.pricing-engine .lp-field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pe-muted);
+  margin-bottom: 6px;
+}
+.pricing-engine .lp-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pricing-engine .lp-input-wrap > span {
+  font-size: 13px;
+  color: var(--pe-muted);
+}
+.pricing-engine .lp-input-wrap input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d8d8d5;
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--pe-surface);
+  color: #1a1a1a;
+  font-family: inherit;
+}
+.pricing-engine .logo-price-item.is-inherited .lp-input-wrap input {
+  color: #666;
+  background: #f3f3f1;
+}
+.pricing-engine .lp-formula {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed #e0e0dc;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pricing-engine .lp-formula-row,
+.pricing-engine .lp-formula-total {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.pricing-engine .lp-formula-op,
+.pricing-engine .lp-formula-eq {
+  flex-shrink: 0;
+  width: 12px;
+  font-weight: 700;
+  color: var(--pe-muted);
+  text-align: center;
+}
+.pricing-engine .lp-zones {
+  color: #444;
+  font-weight: 500;
+}
+.pricing-engine .lp-total {
+  color: var(--pe-green);
+  font-weight: 700;
+  font-size: 13px;
+}
+.pricing-engine .lp-total-unit {
+  color: var(--pe-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* --- Volume pricing table --- */
+.pricing-engine .table-wrap { overflow-x: auto; }
+.pricing-engine table.pe-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+  table-layout: auto;
+}
+.pricing-engine table.pe-table th,
+.pricing-engine table.pe-table td {
+  border: 1px solid var(--pe-line);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+.pricing-engine table.pe-table thead th {
+  font-weight: 600;
+  color: #1a1a1a;
+  background: #fbfbfa;
+}
+.pricing-engine .grp-costos { background: #f5f6f2; }
+.pricing-engine .grp-ajustes { background: #f5f6f2; }
+.pricing-engine td.grp-ajustes { white-space: nowrap; position: relative; }
+
+.pricing-engine .cost-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.pricing-engine .cost-line .lbl { color: var(--pe-muted); flex: 1; }
+.pricing-engine .cost-line .val { font-weight: 500; }
+.pricing-engine .computed { font-weight: 500; color: #555; }
+.pricing-engine .lock-ico { color: #8f8f89; display: inline-flex; flex-shrink: 0; font-size: 11px; }
+
+.pricing-engine .flash-invalid {
+  box-shadow: 0 0 0 2px rgba(214, 69, 69, 0.55) !important;
+  border-radius: 4px;
+}
+
+/* Inline editable product cost */
+.pricing-engine .prod-view {
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  padding: 1px 2px;
+  border-bottom: 1px dashed #b0b0aa;
+}
+.pricing-engine .prod-view:hover { background: #f0f0ee; }
+.pricing-engine .prod-view.custom { color: var(--pe-brand); font-weight: 600; }
+.pricing-engine .prod-view:focus-visible,
+.pricing-engine .markup-view:focus-visible {
+  outline: 2px solid var(--pe-brand);
+  outline-offset: 1px;
+}
+.pricing-engine .prod-editwrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 500;
+}
+.pricing-engine .prod-input {
+  width: 68px;
+  border: 1px solid var(--pe-green-border);
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--pe-brand);
+  padding: 1px 5px;
+  text-align: right;
+  font-family: inherit;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px rgba(51, 153, 51, 0.12);
+}
+.pricing-engine .prod-edit,
+.pricing-engine .markup-edit {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--pe-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  margin: -4px 0;
+  line-height: 1;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.pricing-engine .prod-edit:hover,
+.pricing-engine .markup-edit:hover { color: #1a1a1a; background: #ececea; }
+.pricing-engine .prod-diff {
+  font-size: 11px;
+  color: var(--pe-muted);
+  margin: 1px 0 3px;
+  white-space: nowrap;
+}
+
+.pricing-engine .result { font-weight: 600; background: #eef3fb; }
+.pricing-engine th.grp-result { background: #e7eefa; }
+
+.pricing-engine .cantidad {
+  width: 72px;
+  padding: 6px 8px;
+  border: 1px solid #d8d8d5;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+}
+.pricing-engine .pct {
+  width: 42px;
+  padding: 6px 6px;
+  border: 1px solid #d8d8d5;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+}
+.pricing-engine .th-flex {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.pricing-engine .pct-add,
+.pricing-engine .pct-x {
+  border: 1px dashed #b5b5b0;
+  background: #ffffff;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--pe-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pricing-engine .pct-add:hover { border-color: var(--pe-green); color: var(--pe-green); background: #f4fbf0; }
+.pricing-engine .pct-x { border-style: solid; }
+.pricing-engine .pct-x:hover { color: #a33; border-color: #cc9999; background: #f6eeee; }
+.pricing-engine .pct-eff {
+  /* Absolute so it floats under the input without pushing the row height. */
+  position: absolute;
+  left: 10px;
+  top: calc(50% + 17px);
+  font-size: 11px;
+  color: var(--pe-muted);
+  margin: 0;
+}
+
+/* Inline editable markup */
+.pricing-engine .markup-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pricing-engine .markup-view {
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  padding: 2px 4px;
+  border-bottom: 1px dashed #b0b0aa;
+}
+.pricing-engine .markup-view:hover { background: #f0f0ee; }
+.pricing-engine .markup-view.custom { color: var(--pe-brand); }
+.pricing-engine .markup-input {
+  width: 56px;
+  padding: 4px 8px;
+  border: 1px solid var(--pe-green-border);
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+  background: #ffffff;
+  color: var(--pe-brand);
+  font-weight: 600;
+  font-family: inherit;
+  box-shadow: 0 0 0 2px rgba(51, 153, 51, 0.12);
+}
+.pricing-engine .markup-hint {
+  font-size: 11px;
+  color: var(--pe-muted);
+  margin-top: 4px;
+}
+.pricing-engine .pmargen-hint {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--pe-green);
+  margin-top: 4px;
+  white-space: nowrap;
+}
+.pricing-engine .pmargen-hint.recargo { color: #b45309; }
+
+/* Row delete */
+.pricing-engine .trash { text-align: center; }
+.pricing-engine .trash-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--pe-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+.pricing-engine .trash-btn:hover { color: #a33; background: #f6eeee; }
+.pricing-engine .trash-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+/* Add row */
+.pricing-engine .add-row {
+  margin-top: 12px;
+  padding: 9px 16px;
+  border: 1px dashed var(--pe-green-border);
+  border-radius: 6px;
+  background: #f4fbf0;
+  color: var(--pe-green);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.pricing-engine .add-row:hover { background: #eaf6e1; }
+.pricing-engine .add-row:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-style: solid;
+}
+
+.pricing-engine .footer-note {
+  margin-top: 20px;
+  font-size: 12px;
+  color: var(--pe-muted);
+  line-height: 1.5;
+}
+
+/* Markup tier reference table */
+.pricing-engine table.tier-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+  table-layout: auto;
+}
+.pricing-engine table.tier-table th,
+.pricing-engine table.tier-table td {
+  border: 1px solid var(--pe-line);
+  padding: 6px 10px;
+  text-align: left;
+}
+.pricing-engine table.tier-table thead th {
+  font-weight: 600;
+  background: #fbfbfa;
+}
+
+@media (max-width: 768px) {
+  .pricing-engine .logo-config { flex-direction: column; gap: 16px; }
+  .pricing-engine .logo-col { min-width: 0; }
+  .pricing-engine table.pe-table { font-size: 11.5px; }
+  .pricing-engine table.pe-table th,
+  .pricing-engine table.pe-table td { padding: 6px; }
+  .pricing-engine .cost-line { font-size: 11px; }
+  .pricing-engine .cantidad { width: 58px; }
+  .pricing-engine .pct { width: 40px; }
+  .pricing-engine .markup-input { width: 52px; }
+}

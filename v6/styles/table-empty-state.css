@@ -1,0 +1,94 @@
+/*
+ * Table empty state — class-only API
+ *
+ * Layout:
+ *   .table-empty-state--attached    — desktop table view (≥769px), flush below header
+ *   .table-empty-state--standalone  — mobile (<768px), card/list, and modal contexts
+ *
+ * Visibility:  .table-empty-state--visible
+ * Animation:   .table-empty-state-removing
+ */
+
+.table-empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 160px;
+  padding: 32px 20px;
+  background-color: #fafafa;
+  border: 2px dashed #e0e0e0;
+}
+
+.table-empty-state--visible {
+  display: flex;
+}
+
+.table-empty-state--standalone {
+  min-height: 140px;
+  border-radius: 8px;
+}
+
+.table-empty-state--standalone .table-empty-state__icon {
+  font-size: 1.75rem;
+  margin-bottom: 10px;
+}
+
+.table-empty-state--standalone .table-empty-state__title {
+  font-size: 0.9rem;
+}
+
+.table-empty-state--standalone .table-empty-state__hint {
+  font-size: 0.82rem;
+}
+
+.table-responsive:has(> .table-empty-state--standalone.table-empty-state--visible) > .modal-products-table {
+  display: none;
+}
+
+.table-empty-state__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 360px;
+}
+
+.table-empty-state__icon {
+  font-size: 2.25rem;
+  color: #c4c4c4;
+  margin-bottom: 14px;
+  line-height: 1;
+}
+
+.table-empty-state__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #555;
+  margin: 0 0 6px;
+}
+
+.table-empty-state__hint {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.table-empty-state-removing {
+  animation: tableRowRemove 0.2s ease-in forwards;
+}
+
+@media (min-width: 769px) {
+  .table-empty-state--attached {
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+  }
+}
+
+@keyframes tableRowRemove {
+  to {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
