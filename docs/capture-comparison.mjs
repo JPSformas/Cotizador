@@ -7,8 +7,9 @@ import { readFile } from 'fs/promises';
 import { extname } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const V4_DIR = join(__dirname, '..', 'Cotizacion v4');
-const V5_DIR = __dirname;
+const REPO_ROOT = join(__dirname, '..');
+const V4_DIR = join(REPO_ROOT, '..', 'Cotizacion v4');
+const V5_DIR = REPO_ROOT;
 const OUT = join(__dirname, 'comparison-screenshots');
 
 const MIME = {
@@ -120,7 +121,7 @@ async function captureV4(page) {
 }
 
 async function captureV5(page) {
-  await page.goto('http://127.0.0.1:8765/detalle-cotizacion.html', { waitUntil: 'networkidle' });
+  await page.goto('http://127.0.0.1:8765/v5/detalle-cotizacion.html', { waitUntil: 'networkidle' });
   await page.setViewportSize({ width: 1400, height: 900 });
 
   await shot(page, 'v5-01-atajos-globales', '.col-md-6.col-lg-4');

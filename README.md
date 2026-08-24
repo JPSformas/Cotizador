@@ -1,38 +1,32 @@
-# Cotizacion v5
+# Cotizador
 
-Sistema de cotización para Formas.shop
+Sistema de cotización para Formas.shop. Este repo agrupa prototipos por versión; los assets compartidos viven una sola vez en `shared/`.
 
-## Estructura del Proyecto
+Serví siempre la **raíz del repo** (esta carpeta). Si el document root es `v5/` o `v6/`, los CSS/JS/fuentes de `shared/` no cargan.
 
-- `detalle-cotizacion.html` - Página principal de detalle de cotización
-- `editItem.html` - Editor de items de cotización
-- `editItem-generico.html` - Editor genérico de items
-- `js-scripts/` - Scripts JavaScript del proyecto
-- `styles/` - Archivos CSS de estilos
-- `Fonts/` - Fuentes tipográficas (Gilroy, Poppins)
-- `IMG/` - Imágenes y recursos visuales
-- `products-data.json` - Datos de productos
+## Abrir
 
-## Tecnologías Utilizadas
+- v5 — detalle: `v5/detalle-cotizacion.html`
+- v5 — ítem: `v5/editItem.html` / `v5/editItem-generico.html`
+- v6 — detalle: `v6/detalle-cotizacion.html`
+- v6 — ítem (modo costos): `v6/editItem.html` / `v6/editItem-generico.html`
+- v6 — prototipo de precios: `v6/Propuesta-Precios.html`
 
-- HTML5
-- CSS3
-- JavaScript
-- Bootstrap 5
-- Font Awesome 7.0.1
+Ejemplo:
 
-## Características
+```bash
+npx --yes serve -p 4173 .
+```
 
-- Sistema de cotización interactivo
-- Gestión de items y productos
-- Carga y edición de imágenes
-- Búsqueda de productos
-- Cálculos financieros
-- Drag and drop de items
+Luego: http://localhost:4173/v5/detalle-cotizacion.html
 
+## Estructura
 
+- `shared/` — Fonts, IMG, CSS y JS usados por más de una versión
+- `v5/` — páginas y scripts solo de Cotización v5
+- `v6/` — motor de precios por volumen y páginas que lo usan
+- `docs/` — comparación v4 vs v5, screenshots, y el script Playwright
 
+## Tecnologías
 
-
-
-
+HTML5, CSS3, JavaScript, Bootstrap 5, Font Awesome 7.0.1

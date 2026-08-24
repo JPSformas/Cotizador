@@ -21,7 +21,7 @@ const clearAllSelectedBtn = document.getElementById("clearAllSelected")
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
   // Load products data from JSON file
-  fetch("products-data.json")
+  fetch("../shared/products-data.json")
     .then((response) => response.json())
     .then((data) => {
       productsData = data
