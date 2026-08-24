@@ -113,7 +113,14 @@ class QuantityManager {
         }
     }
 
+    getPriceFieldLabel() {
+        const firstLabel = document.querySelector('#quantitiesContainer .quantity-card .PVPCosto-field .form-label');
+        const label = firstLabel && firstLabel.textContent.trim();
+        return label || 'PVP/Costo';
+    }
+
     createQuantityCard(cardId) {
+        const priceLabel = this.getPriceFieldLabel();
         const cardTemplate = `
             <div class="quantity-card" id="quantity-card-${cardId}">
                 <div class="quantity-card-body">
@@ -123,7 +130,7 @@ class QuantityManager {
                             <input type="number" inputmode="numeric" class="form-control" id="ProductQuantity_${cardId}" name="ProductQuantity_${cardId}" min="1">
                         </div>
                         <div class="PVPCosto-field">
-                            <label class="form-label" for="PVPCosto_${cardId}">PVP/Costo</label>
+                            <label class="form-label" for="PVPCosto_${cardId}">${priceLabel}</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="any" inputmode="numeric" class="form-control" id="PVPCosto_${cardId}" name="PVPCosto_${cardId}" min="0">

@@ -79,7 +79,7 @@
           </div>
           <div class="col-md-9">
             <div class="row mb-3">
-              <div class="col-md-6 mb-3 mb-md-0">
+              <div class="col-md-6">
                 <label for="nombreVariante" class="form-label">Nombre del producto + Variante</label>
                 <input type="text" id="nombreVariante" name="nombreVariante" class="form-control" value="Gorro Tiger - Gris claro">
               </div>
@@ -106,7 +106,7 @@
 
       <!-- Configuración de precios -->
       <div class="card-section">
-        <div class="d-inline-flex align-items-center gap-2 mb-4">
+        <div class="d-inline-flex align-items-center gap-2 mb-3">
           <h2 class="h5 mb-0">Configuración de Precios</h2>
           <button type="button" class="refresh-icon-btn" id="refreshBtn" title="Actualizar">
             <i class="fas fa-sync-alt"></i>
@@ -126,8 +126,8 @@
             <label class="form-check-label" for="printOptionNoPrice">Sin precio con stock</label>
           </div>
         </div>
-        <div class="row mb-4 ">
-          <div class="col-md-4 mb-3 mb-md-0" id="configPrecios">
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-md" id="configPrecios">
             <label for="configPreciosSelect" class="form-label">Configuración de precios</label>
             <select class="form-select" id="configPreciosSelect">
                 <option value="conPrecio" selected>Con precio</option>
@@ -135,7 +135,7 @@
                 <option value="sinPrecio&Stock">Sin precio con stock</option>
             </select>
           </div>
-          <div class="col-md-3 mb-3 mb-md-0">
+          <div class="col-12 col-md">
             <label for="PVP" class="form-label">PVP</label>
             <div class="pvp-input-row">
               <div class="input-group">
@@ -149,7 +149,7 @@
               </div>
             </div>
             <div class="pvp-actual mt-2" id="pvpActualIndicator">
-              <span class="detail-label">PVP Actual:</span>
+              <span class="detail-label">Actual:</span>
               <span class="detail-value" id="pvpActualValue">$11.800,00</span>
               <span class="price-change-indicator price-down" id="pvpChangeIndicator">
                 <i class="fas fa-arrow-down"></i>
@@ -157,23 +157,31 @@
               </span>
             </div>
           </div>
-          <div class="col-md-3 mb-3 mb-md-0">
+          <div class="col-12 col-md">
             <label for="stockDisponible" class="form-label">Stock disponible</label>
             <input type="number" inputmode="numeric" id="stockDisponible" name="stockDisponible" class="form-control form-control-sm" value="2376" disabled>
           </div>
-          <div class="col-md-3 mb-3 mb-md-0">
+          <div class="col-12 col-md">
             <label for="minimoBonificacion" class="form-label">Mínimo para logo gratis</label>
             <div class="input-with-icon">
               <input type="number" inputmode="numeric" id="minimoBonificacion" name="minimoBonificacion" class="form-control form-control-sm" value="200">
               <button type="button" class="icon-button"><i class="fas fa-edit"></i></button>
             </div>
           </div>
-          <div class="col-md-3">
+          <div class="col-12 col-md">
             <label for="setupLogo" class="form-label">Setup logo</label>
             <div class="input-group">
               <span class="input-group-text">$</span>
               <button type="button" class="icon-button"><i class="fas fa-edit"></i></button>
               <input type="text" inputmode="numeric" id="setupLogo" name="setupLogo" class="form-control form-control-sm" value="30.000,00" data-financial-format="true">
+            </div>  
+          </div>
+          <div class="col-12 col-md">
+            <label for="cotizacionDolar" class="form-label">Cotización Dolar</label>
+            <div class="input-group">
+              <span class="input-group-text">U$D</span>
+              <button type="button" class="icon-button"><i class="fas fa-edit"></i></button>
+              <input type="text" inputmode="numeric" id="cotizacionDolar" name="cotizacionDolar" class="form-control form-control-sm" data-financial-format="true" data-pricing-cotizacion-dolar>
               
             </div>  
           </div>
@@ -338,6 +346,10 @@
 
         <!-- Boton Mobile -->
         <button type="button" class="btn btn-outline-secondary mt-3 w-100 d-md-none" id="agregarCantidadMobile" data-bs-toggle="offcanvas" data-bs-target="#sidebarMasElementos"><i class="fas fa-plus"></i>Agregar cantidad</button>
+        <div class="mt-3">
+          <label for="areaObservaciones" class="form-label">Observaciones</label>
+          <textarea class="form-control" id="areaObservaciones" name="observaciones"></textarea>
+        </div>
       </div>
     </div>
 

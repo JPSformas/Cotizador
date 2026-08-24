@@ -80,7 +80,7 @@
           </div>
           <div class="col-md-9">
             <div class="row mb-3">
-              <div class="col-md-6 mb-3 mb-md-0">
+              <div class="col-md-6">
                 <label for="nombreCategoria" class="form-label">Nombre del producto + Categoría</label>
                 <input type="text" id="nombreCategoria" name="nombreCategoria" class="form-control" value="Funda Impermeable | Marroquineria">
               </div>
@@ -122,8 +122,8 @@
             <label class="form-check-label" for="printOptionNoPrice">Sin precio con stock</label>
           </div>
         </div>
-        <div class="row mb-4 ">
-          <div class="col-md-4 mb-3 mb-md-0" id="configPrecios">
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-md" id="configPrecios">
             <label for="configPreciosSelect" class="form-label">Configuración de precios</label>
             <select class="form-select" id="configPreciosSelect">
                 <option value="conPrecio" selected>Con precio</option>
@@ -131,7 +131,7 @@
                 <option value="sinPrecio&Stock">Sin precio con stock</option>
             </select>
           </div>
-          <div class="col-md-3 mb-3 mb-md-0">
+          <div class="col-12 col-md">
             <label for="PVP/Costo" class="form-label">PVP / Costo</label>
             <div class="input-group">
               <span class="input-group-text">$</span>
@@ -139,14 +139,14 @@
               <input type="text" inputmode="numeric" id="PVP/Costo" name="PVP/Costo" class="form-control form-control-sm" value="" data-financial-format="true" data-pricing-pvp>
             </div>  
           </div>
-          <div class="col-md-3 mb-3 mb-md-0">
+          <div class="col-12 col-md">
             <label for="minimoBonificacion" class="form-label">Mínimo para logo gratis</label>
             <div class="input-with-icon">
               <input type="number" inputmode="numeric" id="minimoBonificacion" name="minimoBonificacion" class="form-control form-control-sm" value="">
               <button type="button" class="icon-button"><i class="fas fa-edit"></i></button>
             </div>
           </div>
-          <div class="col-md-3">
+          <div class="col-12 col-md">
             <label for="setupLogo" class="form-label">Setup logo</label>
             <div class="input-group">
               <span class="input-group-text">$</span>
@@ -154,28 +154,77 @@
               <input type="text" inputmode="numeric" id="setupLogo" name="setupLogo" class="form-control form-control-sm" value="" data-financial-format="true" data-pricing-setup>
             </div> 
           </div>
+          <div class="col-12 col-md">
+            <label for="cotizacionDolar" class="form-label">Cotización Dolar</label>
+            <div class="input-group">
+              <span class="input-group-text">U$D</span>
+              <button type="button" class="icon-button"><i class="fas fa-edit"></i></button>
+              <input type="text" inputmode="numeric" id="cotizacionDolar" name="cotizacionDolar" class="form-control form-control-sm" data-financial-format="true" data-pricing-cotizacion-dolar>
+            </div>  
+          </div>
         </div>
 
         <!-- ==========  MOTOR DE PRECIOS POR VOLUMEN (genérico, sin logo)  ========== -->
         <div class="pricing-engine"
              data-pricing-engine
-             data-has-logo="false"
-             data-cost-divisor="1"
+             data-has-logo="true"
+             data-cost-divisor="1.65"
              data-setup-mode="prorated">
 
           <!-- Estado inicial de las cantidades a cotizar -->
           <script type="application/json" data-role="pricing-quotes">
           [
-            { "cantidad": 100, "logoUnit": null, "descs": [0], "fins": [0], "customMarkup": null, "prodCost": null },
-            { "cantidad": 200, "logoUnit": null, "descs": [0], "fins": [0], "customMarkup": null, "prodCost": null }
+            { "cantidad": 50,  "logoUnit": 500,  "descs": [0], "fins": [0], "customMarkup": null, "prodCost": null },
+            { "cantidad": 100,  "logoUnit": null, "descs": [0], "fins": [0], "customMarkup": null, "prodCost": null },
+            { "cantidad": 200, "logoUnit": null, "descs": [0], "fins": [8], "customMarkup": null, "prodCost": null },
+            { "cantidad": 500, "logoUnit": null, "descs": [0], "fins": [0], "customMarkup": null, "prodCost": null }
           ]
           </script>
 
-          <div class="pe-note">
-            El <strong>markup</strong> se aplica <strong>una sola vez</strong> sobre la suma de costos (costo + setup) y sale automáticamente según el monto total de la operación, pero podés <strong>editarlo a mano</strong> en cada fila con el lápiz. El costo del producto sale del campo <strong>PVP / Costo</strong> y es <strong>editable por fila</strong> (por ej. si el vendedor consigue un descuento del proveedor).
-          </div>
-
           <div class="pe-cost-hint" data-role="costo-producto-hint"></div>
+
+          <div class="pe-subhead">Personalización de logo</div>
+          <div class="logo-block">
+            <div class="logo-config">
+              <div class="logo-col">
+                <label>Cantidad de colores</label>
+                <select class="form-select" data-role="colores">
+                  <option value="1">1 color</option>
+                  <option value="2" selected>2 colores</option>
+                  <option value="3">3 colores</option>
+                  <option value="4">4 colores</option>
+                  <option value="full">Full color</option>
+                </select>
+                <div class="metodo-desc">Seleccionable — no afecta el precio (por ahora).</div>
+              </div>
+
+              <div class="logo-col">
+                <label>Cantidad de ubicaciones</label>
+                <div class="stepper">
+                  <button type="button" data-action="ubic-dec" aria-label="Quitar ubicación">−</button>
+                  <span data-role="ubic-val">1</span>
+                  <button type="button" data-action="ubic-inc" aria-label="Agregar ubicación">+</button>
+                </div>
+                <div class="metodo-desc">Multiplica el costo del logo por ubicación.</div>
+              </div>
+
+              <div class="logo-col">
+                <label>Método de impresión</label>
+                <select class="form-select" data-role="metodo">
+                  <option value="serigrafia">Serigrafía</option>
+                  <option value="sublimacion">Sublimación / DTF</option>
+                  <option value="bordado">Bordado</option>
+                </select>
+                <div class="metodo-desc" data-role="metodo-desc"></div>
+              </div>
+            </div>
+
+            <div class="logo-prices">
+              <label class="logo-prices-label">Costo de logo por cantidad</label>
+              <div class="logo-prices-sub">Definí el precio <strong>por ubicación</strong> en cada escalón. El total del logo por unidad es ese valor × la cantidad de ubicaciones.</div>
+              <div class="logo-price-grid" data-role="logo-grid"></div>
+            </div>
+          </div>
 
           <div class="pe-subhead">Precios por volumen</div>
 
@@ -192,31 +241,11 @@
           </div>
 
           <button type="button" class="add-row" data-action="add-row">+ Agregar cantidad (máx. 5)</button>
+        </div>
 
-          <div class="pe-subhead">Escala de markup según monto de la operación</div>
-          <div class="table-wrap">
-            <table class="tier-table">
-              <thead>
-                <tr><th>Monto de la operación (costo total × cantidad)</th><th>Markup</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Hasta $1.000.000</td><td>1,40</td></tr>
-                <tr><td>$1.000.000 – $2.000.000</td><td>1,38</td></tr>
-                <tr><td>$2.000.000 – $5.000.000</td><td>1,35</td></tr>
-                <tr><td>$5.000.000 – $10.000.000</td><td>1,32</td></tr>
-                <tr><td>$10.000.000 – $20.000.000</td><td>1,30</td></tr>
-                <tr><td>$20.000.000 – $30.000.000</td><td>1,28</td></tr>
-                <tr><td>$30.000.000 – $50.000.000</td><td>1,27</td></tr>
-                <tr><td>$50.000.000 – $75.000.000</td><td>1,26</td></tr>
-                <tr><td>$75.000.000 – $100.000.000</td><td>1,255</td></tr>
-                <tr><td>Más de $100.000.000</td><td>1,25 (mínimo)</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="footer-note">
-            Costo = PVP / Costo (editable por fila) &nbsp;·&nbsp; Setup prorrateado = Setup ÷ cantidad &nbsp;·&nbsp; Costo total = Costo + Setup &nbsp;·&nbsp; Markup = según escala (editable a mano), sobre costo total × cantidad &nbsp;·&nbsp; Precio c/markup = Costo total × Markup &nbsp;·&nbsp; Unitario = Precio c/markup × (1 − d₁)(1 − d₂)… × (1 + f₁)(1 + f₂)… — descuentos adicionales y financiaciones en cascada, hasta 3 de cada uno &nbsp;·&nbsp; Subtotal = Unitario × Cantidad
-          </div>
+        <div class="mt-3">
+          <label for="areaObservaciones" class="form-label">Observaciones</label>
+          <textarea class="form-control" id="areaObservaciones" name="observaciones"></textarea>
         </div>
       </div>
     </div>

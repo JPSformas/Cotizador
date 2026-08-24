@@ -12,14 +12,6 @@ Serví siempre la **raíz del repo** (esta carpeta). Si el document root es `v5/
 - v6 — ítem (modo costos): `v6/editItem.html` / `v6/editItem-generico.html`
 - v6 — prototipo de precios: `v6/Propuesta-Precios.html`
 
-Ejemplo:
-
-```bash
-npx --yes serve -p 4173 .
-```
-
-Luego: http://localhost:4173/v5/detalle-cotizacion.html
-
 ## Estructura
 
 - `shared/` — Fonts, IMG, CSS y JS usados por más de una versión

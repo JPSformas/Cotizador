@@ -681,9 +681,23 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="row px-3 mb-4">
-                    <label for="areaObservaciones" class="form-label">Observaciones de la cotización</label>
-                    <textarea class="form-control" id="areaObservaciones">Los valores mencionados no incluyen IVA. Validez del presupuesto: 72 hs. Condición de pago: Transferencia</textarea>
+                <div class="row form-row mb-4">
+                    <div class="col-md-9 form-col mb-3 mb-md-0">
+                        <label for="cotizationURLLastPage" class="form-label">Páginas web</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="cotizationURLLastPage" name="cotizationURLLastPage" value="formas.ar  |  formas.shop">
+                        </div>
+                    </div>
+                    <div class="col-md-3 form-col mb-3 mb-md-0">
+                        <label for="cotizationValidez" class="form-label">Validez</label>
+                        <input type="text" maxlength="15" class="form-control" id="cotizationValidez" name="cotizationValidez" value="7 días">
+                    </div>
+                </div>
+                <div class="row form-row mb-4">
+                    <div class="col-md-12 form-col mb-3 mb-md-0">
+                        <label for="areaObservaciones" class="form-label">Observaciones de la cotización</label>
+                        <textarea class="form-control" id="areaObservaciones">Los valores mencionados no incluyen IVA. Validez del presupuesto: 72 hs. Condición de pago: Transferencia</textarea>
+                    </div>
                 </div>
             </div>
         </div>

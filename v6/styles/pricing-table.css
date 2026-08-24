@@ -240,19 +240,46 @@
 }
 
 /* --- Volume pricing table --- */
-.pricing-engine .table-wrap { overflow-x: auto; }
+.pricing-engine .table-wrap {
+  overflow: auto;
+  border: 1px solid var(--pe-line);
+  border-radius: 8px;
+  background: #ffffff;
+}
 .pricing-engine table.pe-table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   width: 100%;
   font-size: 13px;
   table-layout: auto;
 }
 .pricing-engine table.pe-table th,
 .pricing-engine table.pe-table td {
-  border: 1px solid var(--pe-line);
+  border: 0;
+  border-right: 1px solid var(--pe-line);
+  border-bottom: 1px solid var(--pe-line);
   padding: 8px 10px;
   text-align: left;
   vertical-align: middle;
+}
+.pricing-engine table.pe-table thead tr:first-child > *:last-child,
+.pricing-engine table.pe-table tbody > tr > *:last-child {
+  border-right: 0;
+}
+.pricing-engine table.pe-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.pricing-engine table.pe-table thead tr:first-child > *:first-child {
+  border-top-left-radius: 8px;
+}
+.pricing-engine table.pe-table thead tr:first-child > *:last-child {
+  border-top-right-radius: 8px;
+}
+.pricing-engine table.pe-table tbody tr:last-child > *:first-child {
+  border-bottom-left-radius: 8px;
+}
+.pricing-engine table.pe-table tbody tr:last-child > *:last-child {
+  border-bottom-right-radius: 8px;
 }
 .pricing-engine table.pe-table thead th {
   font-weight: 600;

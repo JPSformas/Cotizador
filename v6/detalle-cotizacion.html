@@ -681,9 +681,23 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="row px-3 mb-4">
-                    <label for="areaObservaciones" class="form-label">Observaciones de la cotización</label>
-                    <textarea class="form-control" id="areaObservaciones">Los valores mencionados no incluyen IVA. Validez del presupuesto: 72 hs. Condición de pago: Transferencia</textarea>
+                <div class="row form-row mb-4">
+                    <div class="col-md-9 form-col mb-3 mb-md-0">
+                        <label for="cotizationURLLastPage" class="form-label">Páginas web</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="cotizationURLLastPage" name="cotizationURLLastPage" value="formas.ar  |  formas.shop">
+                        </div>
+                    </div>
+                    <div class="col-md-3 form-col mb-3 mb-md-0">
+                        <label for="cotizationValidez" class="form-label">Validez</label>
+                        <input type="text" maxlength="15" class="form-control" id="cotizationValidez" name="cotizationValidez" value="7 días">
+                    </div>
+                </div>
+                <div class="row form-row mb-4">
+                    <div class="col-md-12 form-col mb-3 mb-md-0">
+                        <label for="areaObservaciones" class="form-label">Observaciones de la cotización</label>
+                        <textarea class="form-control" id="areaObservaciones">Los valores mencionados no incluyen IVA. Validez del presupuesto: 72 hs. Condición de pago: Transferencia</textarea>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1008,24 +1022,24 @@
                                 <div class="toggle-container h-100">
                                     <input type="radio" id="singlePriceMode" name="pricingMode" value="single" checked>
                                     <label for="singlePriceMode" class="toggle-option">
-                                        <i class="fas fa-tag"></i>
-                                        <span>Precio Único</span>
+                                        <i class="fas fa-coins"></i>
+                                        <span>Costo</span>
                                     </label>
                                     
                                     <input type="radio" id="quantityPriceMode" name="pricingMode" value="quantity">
                                     <label for="quantityPriceMode" class="toggle-option">
-                                        <i class="fas fa-list-ol"></i>
-                                        <span>Por Cantidades</span>
+                                        <i class="fas fa-tag"></i>
+                                        <span>PVP</span>
                                     </label>
                                 </div>
                             </div>
 
-                            <!-- Single Price Mode -->
+                            <!-- Costo Mode -->
                             <div id="singlePriceContainer" class="pricing-container">
                                 <div class="single-price-card">
                                     <div class="single-price-body">
                                         <div class="single-price-field">
-                                            <label class="form-label" for="singlePriceInput">PVP/Costo</label>
+                                            <label class="form-label" for="singlePriceInput">Costo</label>
                                             <div class="input-group">
                                                 <span class="input-group-text">$</span>
                                                 <input type="number" step="any" inputmode="numeric" class="form-control" id="singlePriceInput">
@@ -1035,7 +1049,7 @@
                                 </div>
                             </div>
 
-                            <!-- Quantity-based Price Mode -->
+                            <!-- PVP Mode -->
                             <div id="quantityPriceContainer" class="pricing-container" style="display: none;">
                                 <div id="quantitiesContainer" class="mb-2">
                                     <!-- First card - static in HTML -->
@@ -1047,7 +1061,7 @@
                                                     <input type="number" inputmode="numeric" class="form-control" id="ProductQuantity">
                                                 </div>
                                                 <div class="PVPCosto-field">
-                                                    <label class="form-label" for="PVPCosto">PVP/Costo</label>
+                                                    <label class="form-label" for="PVPCosto">PVP</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text">$</span>
                                                         <input type="number" step="any" inputmode="numeric" class="form-control" id="PVPCosto">
