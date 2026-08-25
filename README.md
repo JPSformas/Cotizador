@@ -9,7 +9,9 @@ Serví siempre la **raíz del repo** (esta carpeta). Si el document root es `v5/
 - v5 — detalle: `v5/detalle-cotizacion.html`
 - v5 — ítem: `v5/editItem.html` / `v5/editItem-generico.html`
 - v6 — detalle: `v6/detalle-cotizacion.html`
-- v6 — ítem (modo costos): `v6/editItem.html` / `v6/editItem-generico.html`
+- v6 — ítem catálogo: `v6/editItem.html`
+- v6 — ítem genérico (Costo): `v6/editItem-generico-costo.html`
+- v6 — ítem genérico (PVP): `v6/editItem-generico-pvp.html`
 - v6 — prototipo de precios: `v6/Propuesta-Precios.html`
 
 ## Estructura

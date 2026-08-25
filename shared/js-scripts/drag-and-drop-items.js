@@ -8,7 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function editPageForRow(row) {
-        return row.classList.contains("generico") ? "editItem-generico.html" : "editItem.html";
+        if (row.classList.contains("generico-pvp")) return "editItem-generico-pvp.html";
+        if (row.classList.contains("generico-costo") || row.classList.contains("generico")) return "editItem-generico-costo.html";
+        return "editItem.html";
     }
 
     /** `orden` = 1-based index aligned with `id="item-{orden}"` after updateItemIds. */

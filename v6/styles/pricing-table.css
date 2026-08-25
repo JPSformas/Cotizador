@@ -45,11 +45,49 @@
 }
 
 .pricing-engine .pe-cost-hint {
-  font-size: 12px;
-  color: var(--pe-muted);
-  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--pe-surface);
+  border: 1px solid var(--pe-line-soft);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #1a1a1a;
 }
-.pricing-engine .pe-cost-hint strong { color: #1a1a1a; }
+.pricing-engine .pe-cost-hint[hidden],
+.pricing-engine .pe-cost-hint:empty {
+  display: none;
+}
+.pricing-engine .pe-cost-hint .lock-ico {
+  color: #8f8f89;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.pricing-engine .pe-cost-hint-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pricing-engine .pe-cost-hint-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+.pricing-engine .pe-cost-hint-formula {
+  font-size: 11px;
+  color: var(--pe-muted);
+  line-height: 1.35;
+}
+.pricing-engine .pe-cost-hint-amount {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pe-brand);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
 
 .pricing-engine .pe-legend {
   display: flex;
@@ -82,16 +120,9 @@
   display: block;
   font-size: 12px;
   color: var(--pe-muted);
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
   font-weight: 600;
 }
-.pricing-engine .metodo-desc {
-  font-size: 11px;
-  color: var(--pe-muted);
-  line-height: 1.4;
-  margin-top: 8px;
-}
-
 /* Stepper for ubicaciones */
 .pricing-engine .stepper {
   display: flex;
@@ -129,17 +160,7 @@
   font-size: 12px;
   color: var(--pe-muted);
   font-weight: 600;
-  margin-bottom: 4px;
-}
-.pricing-engine .logo-prices-sub {
-  font-size: 11px;
-  color: var(--pe-muted);
-  margin-bottom: 14px;
-  line-height: 1.45;
-}
-.pricing-engine .logo-prices-sub strong {
-  color: #444;
-  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 .pricing-engine .logo-price-grid {
   display: grid;
@@ -287,6 +308,7 @@
   background: #fbfbfa;
 }
 .pricing-engine .grp-costos { background: #f5f6f2; }
+.pricing-engine .grp-pvp { background: #f5f6f2; }
 .pricing-engine .grp-ajustes { background: #f5f6f2; }
 .pricing-engine td.grp-ajustes { white-space: nowrap; position: relative; }
 
@@ -341,7 +363,20 @@
   border-radius: 4px;
   box-shadow: 0 0 0 2px rgba(51, 153, 51, 0.12);
 }
-.pricing-engine .prod-edit,
+.pricing-engine .prod-edit {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--pe-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0px;
+  margin: -4px 0;
+  line-height: 1;
+  font-size: 12px;
+}
+
 .pricing-engine .markup-edit {
   border: none;
   background: none;
@@ -357,7 +392,11 @@
   font-size: 12px;
 }
 .pricing-engine .prod-edit:hover,
-.pricing-engine .markup-edit:hover { color: #1a1a1a; background: #ececea; }
+.pricing-engine .markup-edit:hover { 
+  color: #1a1a1a;
+  transform: scale(1.15); 
+}
+
 .pricing-engine .prod-diff {
   font-size: 11px;
   color: var(--pe-muted);
@@ -375,6 +414,24 @@
   border-radius: 6px;
   font-size: 13px;
   font-family: inherit;
+}
+.pricing-engine .pvp-vol-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pricing-engine .pvp-vol-wrap > span {
+  font-size: 13px;
+  color: var(--pe-muted);
+}
+.pricing-engine .pvp-vol-input {
+  width: 96px;
+  padding: 6px 8px;
+  border: 1px solid #d8d8d5;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  text-align: right;
 }
 .pricing-engine .pct {
   width: 42px;
@@ -532,6 +589,7 @@
   .pricing-engine table.pe-table td { padding: 6px; }
   .pricing-engine .cost-line { font-size: 11px; }
   .pricing-engine .cantidad { width: 58px; }
+  .pricing-engine .pvp-vol-input { width: 80px; }
   .pricing-engine .pct { width: 40px; }
   .pricing-engine .markup-input { width: 52px; }
 }

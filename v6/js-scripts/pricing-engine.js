@@ -16,9 +16,14 @@
  *   Subtotal       = Unitario x Cantidad
  *
  * Container configuration via data-* attributes:
- *   data-has-logo      "true" | "false"     (default "true")
- *   data-cost-divisor  number, e.g. "1.65"  (default 1.65)
+ *   data-pricing-mode  "costo" | "pvp"      (default "costo")
+ *   data-has-logo      "true" | "false"     (default "true"; forced false in pvp)
+ *   data-cost-divisor  number, e.g. "1.65"  (default 1.65; costo mode only)
  *   data-setup-mode    "prorated" | "flat"  (default "flat")
+ *
+ * PVP mode (generic products loaded from selling price):
+ *   No logo block, no Costos / Markup columns. Each row has an editable
+ *   Precio x Volumen; unitario = that price × discounts × financing.
  *
  * The PVP source, setup source, save button and refresh button live outside the
  * container; mark them with data-pricing-pvp / data-pricing-setup /
@@ -32,7 +37,7 @@
 
   var ICONS = {
     lock: '<i class="fas fa-lock" aria-hidden="true"></i>',
-    edit: '<i class="fas fa-pen" aria-hidden="true"></i>',
+    edit: '<i class="fas fa-edit" aria-hidden="true"></i>',
     undo: '<i class="fas fa-rotate-left" aria-hidden="true"></i>',
     trash: '<i class="far fa-trash-alt" aria-hidden="true"></i>'
   };
@@ -112,7 +117,9 @@
 
   function PricingEngine(root) {
     this.root = root;
-    this.hasLogo = root.getAttribute('data-has-logo') !== 'false';
+    this.pricingMode = (root.getAttribute('data-pricing-mode') || 'costo').toLowerCase();
+    this.isPvpMode = this.pricingMode === 'pvp';
+    this.hasLogo = !this.isPvpMode && root.getAttribute('data-has-logo') !== 'false';
     this.divisor = parseFloat(root.getAttribute('data-cost-divisor')) || 1.65;
     // 'prorated' -> setup divided across the row quantity (SETUP Prorrateado)
     // 'flat'     -> setup added per unit as-is
@@ -152,6 +159,7 @@
         if (q.logoUnit === undefined) q.logoUnit = null;
         if (q.customMarkup === undefined) q.customMarkup = null;
         if (q.prodCost === undefined) q.prodCost = null;
+        if (q.precioVolumen === undefined) q.precioVolumen = null;
       });
       return parsed;
     } catch (e) {
@@ -193,7 +201,7 @@
     // Live recompute for text inputs (cantidad, logo, pct, prod, markup).
     r.addEventListener('input', function (e) {
       var t = e.target;
-      if (t.matches('.cantidad, .lp-input, .pct, .prod-input, .markup-input')) {
+      if (t.matches('.cantidad, .lp-input, .pct, .prod-input, .markup-input, .pvp-vol-input')) {
         self.refresh();
       }
     });
@@ -297,6 +305,8 @@
         var pv = parseMoney(p.value);
         if (pv) q.prodCost = pv;
       }
+      var vol = self.root.querySelector('.pvp-vol-input[data-i="' + i + '"]');
+      if (vol) q.precioVolumen = parseMoney(vol.value);
     });
   };
 
@@ -374,6 +384,11 @@
   };
 
   PricingEngine.prototype.buildRows = function () {
+    if (this.isPvpMode) {
+      this.buildPvpRows();
+      return;
+    }
+
     if (this.el.head) {
       this.el.head.innerHTML = '<tr>'
         + '<th rowspan="2">Cantidad</th>'
@@ -457,10 +472,57 @@
     this.updateAll();
   };
 
+  PricingEngine.prototype.buildPvpRows = function () {
+    if (this.el.head) {
+      this.el.head.innerHTML = '<tr>'
+        + '<th rowspan="2">Cantidad</th>'
+        + '<th class="grp-pvp" rowspan="2">Precio x Volumen</th>'
+        + '<th class="grp-ajustes" colspan="' + (this.nDesc + this.nFin) + '">Ajustes comerciales</th>'
+        + '<th class="grp-result" colspan="2">Resultado</th>'
+        + '<th rowspan="2"></th>'
+        + '</tr><tr>'
+        + this.headPctThs('descs', 'Desc. adicional', 'Desc.', this.nDesc)
+        + this.headPctThs('fins', 'Financiación', 'Fin.', this.nFin)
+        + '<th class="grp-result">Unitario</th>'
+        + '<th class="grp-result">Subtotal</th>'
+        + '</tr>';
+    }
+
+    this.el.body.innerHTML = this.quotes.map(function (q, i) {
+      var volVal = (q.precioVolumen != null && q.precioVolumen !== '') ? fmtPlain(q.precioVolumen) : '';
+      return '<tr data-i="' + i + '">'
+        + '<td><input class="cantidad" type="text" data-i="' + i + '" value="' + q.cantidad + '"></td>'
+        + '<td class="grp-pvp">'
+          + '<div class="pvp-vol-wrap"><span>$</span>'
+          + '<input class="pvp-vol-input" type="text" inputmode="numeric" data-i="' + i + '" value="' + volVal + '">'
+          + '</div>'
+        + '</td>'
+        + this.pctTds(i, 'descs', 'desc-input', 'desc-eff')
+        + this.pctTds(i, 'fins', 'fin-input', 'fin-eff')
+        + '<td class="result unit-cell">$0,00</td>'
+        + '<td class="result sub-cell">$0,00</td>'
+        + '<td class="trash"><button type="button" class="trash-btn" data-action="remove-row" data-i="' + i + '" title="Eliminar cantidad" aria-label="Eliminar cantidad"' + (this.quotes.length <= 1 ? ' disabled' : '') + '>' + ICONS.trash + '</button></td>'
+        + '</tr>';
+    }, this).join('');
+
+    if (this.el.addBtn) this.el.addBtn.disabled = this.quotes.length >= MAX_FILAS;
+    this.updateAll();
+  };
+
   PricingEngine.prototype.addRow = function () {
     if (this.quotes.length >= MAX_FILAS) return;
     this.syncFromDom();
-    this.quotes.push({ cantidad: 1000, logoUnit: null, fins: zeros(this.nFin), descs: zeros(this.nDesc), customMarkup: null, prodCost: null });
+    this.quotes.push({
+      cantidad: 1000,
+      logoUnit: null,
+      fins: zeros(this.nFin),
+      descs: zeros(this.nDesc),
+      customMarkup: null,
+      prodCost: null,
+      precioVolumen: this.isPvpMode
+        ? ((this.quotes.length && this.quotes[this.quotes.length - 1].precioVolumen) || this.getPvp() || null)
+        : null
+    });
     this.buildRows();
   };
 
@@ -546,13 +608,60 @@
     }
   };
 
+  PricingEngine.prototype.updatePvpRows = function () {
+    var self = this;
+    var fallbackPvp = this.getPvp();
+
+    this.quotes.forEach(function (q, i) {
+      var tr = self.el.body.querySelector('tr[data-i="' + i + '"]');
+      if (!tr) return;
+
+      var descFactor = 1, finFactor = 1;
+      q.descs.forEach(function (d) { descFactor *= (1 - d / 100); });
+      q.fins.forEach(function (f) { finFactor *= (1 + f / 100); });
+
+      var precioVol = (q.precioVolumen != null && q.precioVolumen !== '')
+        ? q.precioVolumen
+        : fallbackPvp;
+      var unitario = precioVol * descFactor * finFactor;
+      var subtotal = unitario * q.cantidad;
+
+      var dEff = tr.querySelector('.desc-eff');
+      if (dEff) {
+        dEff.textContent = 'efect. ' + fmtPct(1 - descFactor);
+        dEff.title = q.descs.map(function (d) { return d + '%'; }).join(' + ') + ' en cascada';
+      }
+      var fEff = tr.querySelector('.fin-eff');
+      if (fEff) {
+        fEff.textContent = 'efect. ' + fmtPct(finFactor - 1);
+        fEff.title = q.fins.map(function (f) { return f + '%'; }).join(' + ') + ' en cascada';
+      }
+
+      tr.querySelector('.unit-cell').textContent = money(unitario);
+      tr.querySelector('.sub-cell').textContent = money(subtotal);
+    });
+  };
+
   PricingEngine.prototype.updateAll = function () {
+    if (this.isPvpMode) {
+      this.updatePvpRows();
+      return;
+    }
+
     var self = this;
     var costoProducto = this.autoProd();
     if (this.el.costoHint) {
-      this.el.costoHint.textContent = (this.divisor === 1)
-        ? ('Costo: ' + money(costoProducto))
-        : ('Costo producto: ' + money(costoProducto) + ' (PVP ÷ ' + inputVal(this.divisor) + ')');
+      var pvp = this.getPvp();
+      var showHint = this.divisor !== 1 && pvp > 0;
+      this.el.costoHint.hidden = !showHint;
+      this.el.costoHint.innerHTML = showHint
+        ? ('<span class="lock-ico">' + ICONS.lock + '</span>'
+          + '<span class="pe-cost-hint-copy">'
+          + '<span class="pe-cost-hint-label">Costo de producto</span>'
+          + '<span class="pe-cost-hint-formula">PVP ' + money(pvp) + ' ÷ ' + inputVal(this.divisor) + '</span>'
+          + '</span>'
+          + '<span class="pe-cost-hint-amount">' + money(costoProducto) + '</span>')
+        : '';
     }
 
     var ubic = this.hasLogo ? this.ubicacionesActual : 0;

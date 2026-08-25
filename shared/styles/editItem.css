@@ -5,6 +5,11 @@ body {
   background: #f5f5f5;
   color: #333;
   font-family: "Poppins", sans-serif;
+  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+html {
+  scroll-padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
 }
 
 .card {
@@ -168,6 +173,105 @@ th.min-xl,td.min-xl { min-width: 170px; }
 }
 .tf-btn.btn-white.has-border:hover {
   border-color: var(--secondary) !important;
+}
+
+/* --- Barra de acciones fija --- */
+.edit-item-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.94);
+  border-top: 1px solid #e8e8e8;
+  box-shadow: 0 -8px 28px rgba(24, 24, 24, 0.08);
+  padding: 0.75rem 0 calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+@supports (backdrop-filter: blur(12px)) {
+  .edit-item-action-bar {
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+}
+
+.edit-item-action-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.edit-item-action-bar__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 0;
+  flex: 1 1 auto;
+  padding-right: 0.5rem;
+}
+
+.edit-item-action-bar__back i {
+  flex-shrink: 0;
+}
+
+.edit-item-action-bar__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.edit-item-action-bar__nav {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.edit-item-action-bar__save {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.edit-item-action-bar .tf-btn:focus-visible,
+.edit-item-action-bar .back-link:focus-visible {
+  outline: 2px solid var(--main);
+  outline-offset: 3px;
+}
+
+.edit-item-action-bar .back-link:focus-visible {
+  border-radius: 4px;
+}
+
+.edit-item-action-bar .tf-btn:disabled,
+.edit-item-action-bar .tf-btn:disabled:hover {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.edit-item-action-bar .tf-btn:disabled::after {
+  display: none;
+}
+
+.edit-item-action-bar .tf-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edit-item-action-bar .tf-btn:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .edit-item-action-bar .tf-btn {
+    padding-left: 12px;
+    padding-right: 12px;
+    font-size: 14px;
+    line-height: 22px;
+  }
 }
 
 @media (max-width: 768px) {

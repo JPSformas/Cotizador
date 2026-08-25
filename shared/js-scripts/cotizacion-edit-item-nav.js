@@ -2,7 +2,8 @@
   var DEFAULT_CHAIN = [
     { page: 'editItem.html' },
     { page: 'editItem.html' },
-    { page: 'editItem-generico.html' }
+    { page: 'editItem-generico-costo.html' },
+    { page: 'editItem-generico-pvp.html' }
   ];
 
   function loadChainFromStorage() {
@@ -12,7 +13,7 @@
       var parsed = JSON.parse(raw);
       if (!Array.isArray(parsed) || parsed.length === 0) return null;
       var ok = parsed.every(function (entry) {
-        return entry && typeof entry.page === 'string' && /^editItem(-generico)?\.html$/.test(entry.page);
+        return entry && typeof entry.page === 'string' && /^editItem(-generico-(costo|pvp))?\.html$/.test(entry.page);
       });
       return ok ? parsed : null;
     } catch (e) {

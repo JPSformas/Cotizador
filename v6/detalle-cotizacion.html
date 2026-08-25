@@ -565,7 +565,7 @@
                                     <button type="button" class="delete-btn-mobile"><span>Eliminar</span></button>
                                 </td>
                             </tr>
-                            <tr id="item-3" class="item-container generico" data-id="#">
+                            <tr id="item-3" class="item-container generico generico-costo" data-id="#">
                                 <td class="dragItem">
                                     <div class="dragItem-inner">
                                         <span class="material-symbols-outlined drag-handle" aria-hidden="true">drag_indicator</span>
@@ -669,14 +669,113 @@
                                     <div class="subtotal-tag">$1.600.000,00</div>
                                 </td>
                                 <td class="action-buttons-desktop"><button type="button" class="duplicate-icon-btn"><i class="fas fa-clone"></i></button></td>
-                                <td class="action-buttons-desktop"><a href="editItem-generico.html?orden=3" class="edit-btn" data-itemid="#"><i class="fas fa-edit edit-btn"></i></a></td>
+                                <td class="action-buttons-desktop"><a href="editItem-generico-costo.html?orden=3" class="edit-btn" data-itemid="#"><i class="fas fa-edit edit-btn"></i></a></td>
                                 <td class="action-buttons-desktop"><button type="button" class="delete-btn"><i class="far fa-trash-alt"></i></button></td>
                                 <td class="action-buttons-mobile">
                                     <button type="button" class="duplicate-btn-mobile"><i class="fas fa-clone"></i></button>
-                                    <a href="editItem-generico.html?orden=3" class="edit-btn-mobile" data-itemid="#"><span>Editar</span></a>
+                                    <a href="editItem-generico-costo.html?orden=3" class="edit-btn-mobile" data-itemid="#"><span>Editar</span></a>
                                     <button type="button" class="delete-btn-mobile"><span>Eliminar</span></button>
                                 </td>
                                 
+                            </tr>
+                            <tr id="item-4" class="item-container generico generico-pvp" data-id="#">
+                                <td class="dragItem">
+                                    <div class="dragItem-inner">
+                                        <span class="material-symbols-outlined drag-handle" aria-hidden="true">drag_indicator</span>
+                                        <span class="item-position-wrap">
+                                            <button type="button" class="item-position-display" aria-label="Editar posición">4</button>
+                                            <input type="number" class="item-position-input" min="1" step="1" aria-label="Nueva posición" hidden>
+                                        </span>
+                                        <input type="checkbox" class="form-check-input item-row-checkbox" aria-label="Seleccionar ítem">
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="product-image mx-auto">
+                                        <span class="product-flag">Manual</span>
+                                        <img src="../shared/IMG/placeholder2.jpg" alt="product-img" class="product-img">
+                                    </div>
+                                </td>
+                                <td class="productName">
+                                    <div class="product-name-main">Botella térmica | Drinkware</div>
+                                    <div class="product-details">
+                                        <div class="product-pvp" data-original-price="2500" data-current-price="2500" data-price-updated-date="2026-06-05">
+                                            <span class="detail-label">PVP:</span>
+                                            <span class="detail-value">$2.500,00</span>
+                                            <i class="fas fa-exclamation-triangle pvp-warning-icon" style="display: none;" tabindex="0" aria-label="Precio desactualizado"></i>
+                                            <i class="fas fa-check-circle pvp-check-icon"></i>
+                                            <button type="button" class="refresh-icon-btn"><i class="fas fa-sync-alt"></i></button>
+                                        </div>
+                                        <div class="pvp-actual">
+                                            <span class="detail-label">PVP Actual:</span>
+                                            <span class="detail-value">$2.500,00</span>
+                                            <span class="price-change-indicator">
+                                                <i class="fas fa-minus"></i>
+                                                <span class="price-change-percent">0%</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="productDescription">
+                                    <div class="description-wrapper">
+                                        <p>Botella térmica reutilizable de doble pared. Tapa de bamboo con argolla metálica. COLOR: Azul navy. Personalizable con logo.</p>
+                                    </div>
+                                </td>
+                                <td class="productQuantities">
+                                    <div class="quantities-tag">x50</div> 
+                                    <div class="quantities-tag">x100</div>
+                                    <div class="quantities-tag">x200</div>
+                                    <div class="quantities-tag">x500</div>
+                                    
+                                    <div class="mini-table">
+                                        <div class="mini-section">
+                                            <div class="mini-label">Cantidades</div>
+                                            <div class="mini-content">
+                                                <div class="quantities-tag">x50</div> 
+                                                <div class="quantities-tag">x100</div>
+                                                <div class="quantities-tag">x200</div>
+                                                <div class="quantities-tag">x500</div>
+                                            </div>
+                                        </div>
+                                        <div class="mini-section">
+                                            <div class="mini-label">Precio Unitario</div>
+                                            <div class="mini-content">
+                                                <div class="precio-tag">$2.500,00</div>
+                                                <div class="precio-tag">$2.200,00</div>
+                                                <div class="precio-tag">$2.000,00</div>
+                                                <div class="precio-tag">$1.800,00</div>
+                                            </div>
+                                        </div>
+                                        <div class="mini-section">
+                                            <div class="mini-label">Subtotal</div>
+                                            <div class="mini-content">
+                                                <div class="subtotal-tag">$125.000,00</div>
+                                                <div class="subtotal-tag">$220.000,00</div>
+                                                <div class="subtotal-tag">$400.000,00</div>
+                                                <div class="subtotal-tag">$900.000,00</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="productPrecioUnitario">
+                                    <div class="precio-tag">$2.500,00</div>
+                                    <div class="precio-tag">$2.200,00</div>
+                                    <div class="precio-tag">$2.000,00</div>
+                                    <div class="precio-tag">$1.800,00</div>
+                                </td>
+                                <td class="productSubtotal">
+                                    <div class="subtotal-tag">$125.000,00</div>
+                                    <div class="subtotal-tag">$220.000,00</div>
+                                    <div class="subtotal-tag">$400.000,00</div>
+                                    <div class="subtotal-tag">$900.000,00</div>
+                                </td>
+                                <td class="action-buttons-desktop"><button type="button" class="duplicate-icon-btn"><i class="fas fa-clone"></i></button></td>
+                                <td class="action-buttons-desktop"><a href="editItem-generico-pvp.html?orden=4" class="edit-btn" data-itemid="#"><i class="fas fa-edit edit-btn"></i></a></td>
+                                <td class="action-buttons-desktop"><button type="button" class="delete-btn"><i class="far fa-trash-alt"></i></button></td>
+                                <td class="action-buttons-mobile">
+                                    <button type="button" class="duplicate-btn-mobile"><i class="fas fa-clone"></i></button>
+                                    <a href="editItem-generico-pvp.html?orden=4" class="edit-btn-mobile" data-itemid="#"><span>Editar</span></a>
+                                    <button type="button" class="delete-btn-mobile"><span>Eliminar</span></button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
