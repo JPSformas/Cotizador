@@ -23,13 +23,13 @@ Serví siempre la **raíz del repo** (esta carpeta). Si el document root es `v5/
 
 ## Verificación
 
-\`\`\`bash
+```bash
 npm run verify:bulk            # todas las comprobaciones
 npm run verify:bulk -- --only=mobile
-\`\`\`
+```
 
 Levanta un servidor estático en el puerto 8099 y recorre v6 y v5 con Playwright.
-Requiere \`npx playwright install chromium\` la primera vez.
+Requiere `npx playwright install chromium` la primera vez.
 
 ## Tecnologías
 
