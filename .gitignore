@@ -26,6 +26,9 @@ npm-debug.log*
 # Screenshot tooling (dev only)
 node_modules/
 
+# Scratch de ejecucion por subagentes (briefs, reportes, diffs, ledger)
+.superpowers/
+
 
 
 

@@ -15,7 +15,7 @@
 - Serve from the **repo root**. `v5/` or `v6/` as document root breaks every `../shared/` path.
 - `v5/` is frozen. No behaviour change to any v5 page is acceptable.
 - `shared/js-scripts/*` is loaded by both versions. v6-only behaviour goes in `v6/js-scripts/`, and shared scripts may only gain a bail-out guard.
-- Match `pricing-engine.js` style: IIFE, `var`, `function`, string concatenation for markup, no arrow functions, no template literals.
+- Match `pricing-engine.js` style in all **browser** scripts (`v6/js-scripts/`, `shared/js-scripts/`): IIFE, `var`, `function`, string concatenation for markup, no arrow functions, no template literals. This does not bind `docs/verify-bulk-cantidades.mjs`, which is Node-only and uses modern syntax throughout.
 - Row cap is `MAX_FILAS = 5`; cascade cap is `MAX_PCT = 3`. Never fork these numbers.
 - The ladder can never be empty: the trash button is disabled at one row.
 - UI copy is Spanish. Exact strings: `Cargar cantidades`, `Logo x Ubicación`, `Markup`, `Ajustes comerciales`, `Desc. adicional`, `Financiación`, `Cantidad`, `sin cambios`, `base`, `heredado`, `+ Agregar cantidad (máx. 5)`, `+ Agregar descuento en cascada`, `+ Agregar financiación en cascada`, `Se agrega para todas las cantidades`, `Editar cantidad`, `Agregar cantidades`.
