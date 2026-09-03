@@ -180,10 +180,8 @@
       ubicVal: r.querySelector('[data-role="ubic-val"]'),
       costoHint: r.querySelector('[data-role="costo-producto-hint"]')
     };
-    var scopeSel = r.getAttribute('data-pricing-scope');
-    this.scope = scopeSel ? (document.querySelector(scopeSel) || document) : document;
-    this.pvpInput = this.scope.querySelector('[data-pricing-pvp]');
-    this.setupInput = this.scope.querySelector('[data-pricing-setup]');
+    this.pvpInput = document.querySelector('[data-pricing-pvp]');
+    this.setupInput = document.querySelector('[data-pricing-setup]');
   };
 
   PricingEngine.prototype.getPvp = function () {
@@ -275,13 +273,13 @@
       this.setupInput.addEventListener('input', function () { self.updateAll(); });
     }
     // Recompute after the PVP refresh mock rewrites the field programmatically.
-    var refreshBtn = this.scope.querySelector('[data-pricing-refresh]');
+    var refreshBtn = document.querySelector('[data-pricing-refresh]');
     if (refreshBtn) {
       refreshBtn.addEventListener('click', function () {
         setTimeout(function () { self.updateAll(); }, 0);
       });
     }
-    var saveBtn = this.scope.querySelector('[data-pricing-save]');
+    var saveBtn = document.querySelector('[data-pricing-save]');
     if (saveBtn) {
       saveBtn.addEventListener('click', function () { self.save(saveBtn); });
     }

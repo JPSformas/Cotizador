@@ -77,9 +77,37 @@ for (const path of ITEM_PAGES) {
       () => !!document.querySelector('[data-pricing-engine]').__pricingEngine
     );
     assert(published, 'root.__pricingEngine is not published');
+
+    // El motor resuelve campos que viven fuera de su raíz. Si esa búsqueda se
+    // rompe, la tabla igual renderiza y no hay error: hay que afirmarlo.
+    const wired = await page.evaluate(() => {
+      const e = document.querySelector('[data-pricing-engine]').__pricingEngine;
+      return {
+        pvpInDom: !!document.querySelector('[data-pricing-pvp]'),
+        setupInDom: !!document.querySelector('[data-pricing-setup]'),
+        pvpResolved: !!e.pvpInput,
+        setupResolved: !!e.setupInput,
+      };
+    });
+    assert(wired.pvpInDom === wired.pvpResolved, 'pvpInput resolution disagrees with the DOM on ' + path);
+    assert(wired.setupInDom === wired.setupResolved, 'setupInput resolution disagrees with the DOM on ' + path);
     await page.close();
   });
 }
+
+// Se usa la página genérico-costo: es la única donde el campo externo
+// [data-pricing-pvp] alimenta el cálculo. En editItem.html el campo está
+// disabled, y en genérico-pvp cada fila trae su propio precioVolumen, que
+// pisa al PVP externo: allí la fila no se movería aunque el cableado ande.
+await check('editing the PVP field moves the totals', async () => {
+  const page = await open('v6/editItem-generico-costo.html');
+  const before = await page.$eval('[data-role="pricing-body"] tr', (r) => r.textContent);
+  await page.fill('[data-pricing-pvp]', '9999');
+  await page.waitForTimeout(200);
+  const after = await page.$eval('[data-role="pricing-body"] tr', (r) => r.textContent);
+  assert(before !== after, 'the row did not react to the PVP field; the external wiring is broken');
+  await page.close();
+});
 
 for (const path of ['v5/editItem.html', 'v5/editItem-generico.html', 'v5/detalle-cotizacion.html', 'v6/detalle-cotizacion.html']) {
   await check('loads clean: ' + path, async () => {
