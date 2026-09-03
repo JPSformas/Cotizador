@@ -26,12 +26,14 @@
 
 ### Task 1: Verification harness + engine multi-instance support
 
-The engine currently constructs exactly one instance via `document.querySelector` and reaches out to `[data-pricing-pvp]` / `[data-pricing-setup]` / `[data-pricing-save]` / `[data-pricing-refresh]` anywhere in the document. `detalle-cotizacion.html` will host two engines, so both have to be fixed before anything else. This task changes no visible behaviour — the harness exists to prove that.
+The engine constructs exactly one instance via `document.querySelector`, so a page hosting two engines would only ever get one. `detalle-cotizacion.html` will host two, so this has to be fixed before anything else. This task changes no visible behaviour — the harness exists to prove that.
+
+The engine also reaches out to `[data-pricing-pvp]` / `[data-pricing-setup]` / `[data-pricing-save]` / `[data-pricing-refresh]` anywhere in the document. Leave those document-wide: the pages that host two engines host them in `bulk` mode, and Task 2 makes bulk mode wire no external fields at all, which removes the cross-instance risk without introducing a scoping mechanism nothing uses.
 
 **Files:**
 - Create: `docs/verify-bulk-cantidades.mjs`
 - Modify: `package.json` (add the `verify:bulk` script)
-- Modify: `v6/js-scripts/pricing-engine.js` (`cacheDom`, `bindEvents`, `init`)
+- Modify: `v6/js-scripts/pricing-engine.js` (`init` only)
 
 **Interfaces:**
 - Produces: `root.__pricingEngine` — the `PricingEngine` instance, published on each `[data-pricing-engine]` element. Every later task reaches the engine through this.
@@ -121,9 +123,33 @@ for (const path of ITEM_PAGES) {
       () => !!document.querySelector('[data-pricing-engine]').__pricingEngine
     );
     assert(published, 'root.__pricingEngine is not published');
+
+    // El motor resuelve campos que viven fuera de su raíz. Si esa búsqueda se
+    // rompe, la tabla igual renderiza y no hay error: hay que afirmarlo.
+    const wired = await page.evaluate(() => {
+      const e = document.querySelector('[data-pricing-engine]').__pricingEngine;
+      return {
+        pvpInDom: !!document.querySelector('[data-pricing-pvp]'),
+        setupInDom: !!document.querySelector('[data-pricing-setup]'),
+        pvpResolved: !!e.pvpInput,
+        setupResolved: !!e.setupInput,
+      };
+    });
+    assert(wired.pvpInDom === wired.pvpResolved, 'pvpInput resolution disagrees with the DOM on ' + path);
+    assert(wired.setupInDom === wired.setupResolved, 'setupInput resolution disagrees with the DOM on ' + path);
     await page.close();
   });
 }
+
+await check('editing the PVP field moves the totals', async () => {
+  const page = await open('v6/editItem-generico-pvp.html');
+  const before = await page.$eval('[data-role="pricing-body"] tr', (r) => r.textContent);
+  await page.fill('[data-pricing-pvp]', '9999');
+  await page.waitForTimeout(200);
+  const after = await page.$eval('[data-role="pricing-body"] tr', (r) => r.textContent);
+  assert(before !== after, 'the row did not react to the PVP field; the external wiring is broken');
+  await page.close();
+});
 
 for (const path of ['v5/editItem.html', 'v5/editItem-generico.html', 'v5/detalle-cotizacion.html', 'v6/detalle-cotizacion.html']) {
   await check('loads clean: ' + path, async () => {
@@ -159,7 +185,7 @@ Add the script to `package.json`:
 - [ ] **Step 2: Run to verify it fails**
 
 Run: `npm run verify:bulk`
-Expected: the three `engine still renders 4 rows on ...` checks FAIL with `root.__pricingEngine is not published`. The `loads clean:` checks pass.
+Expected: the three `engine still renders 4 rows on ...` checks FAIL with `root.__pricingEngine is not published`. The `loads clean:` and `editing the PVP field` checks pass.
 
 - [ ] **Step 3: Publish the instance and construct one engine per root**
 
@@ -175,38 +201,14 @@ In `v6/js-scripts/pricing-engine.js`, replace the `init` function at the bottom 
   }
 ```
 
-- [ ] **Step 4: Scope the external field lookups**
+Leave `cacheDom` and `bindEvents` untouched. Their document-wide lookups are correct for every page that exists, and Task 2 removes the multi-instance hazard at its source.
 
-Still in `pricing-engine.js`, in `cacheDom`, replace the two trailing `document.querySelector` lines:
-
-```js
-    var scopeSel = r.getAttribute('data-pricing-scope');
-    this.scope = scopeSel ? (document.querySelector(scopeSel) || document) : document;
-    this.pvpInput = this.scope.querySelector('[data-pricing-pvp]');
-    this.setupInput = this.scope.querySelector('[data-pricing-setup]');
-```
-
-In `bindEvents`, replace the two trailing `document.querySelector` lookups so they respect the same scope:
-
-```js
-    var refreshBtn = this.scope.querySelector('[data-pricing-refresh]');
-    if (refreshBtn) {
-      refreshBtn.addEventListener('click', function () {
-        setTimeout(function () { self.updateAll(); }, 0);
-      });
-    }
-    var saveBtn = this.scope.querySelector('[data-pricing-save]');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', function () { self.save(saveBtn); });
-    }
-```
-
-- [ ] **Step 5: Run to verify it passes**
+- [ ] **Step 4: Run to verify it passes**
 
 Run: `npm run verify:bulk`
-Expected: `7/7 checks passed`.
+Expected: `8/8 checks passed`.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add docs/verify-bulk-cantidades.mjs package.json v6/js-scripts/pricing-engine.js
@@ -347,6 +349,17 @@ await check('setBulkColumns hides logo and markup', async () => {
   await page.close();
 });
 
+await check('bulk engines wire no fields outside their root', async () => {
+  const page = await open(BULK_FIXTURE);
+  const wiring = await page.evaluate(() => {
+    const e = document.querySelector('[data-pricing-engine]').__pricingEngine;
+    return { pvp: e.pvpInput, setup: e.setupInput };
+  });
+  assert(wiring.pvp === null, 'a bulk engine must not claim [data-pricing-pvp]');
+  assert(wiring.setup === null, 'a bulk engine must not claim [data-pricing-setup]');
+  await page.close();
+});
+
 await check('resetBulkQuotes restores the default ladder', async () => {
   const page = await open(BULK_FIXTURE);
   await page.click('[data-action="add-row"]');
@@ -362,7 +375,7 @@ await check('resetBulkQuotes restores the default ladder', async () => {
 - [ ] **Step 2: Run to verify it fails**
 
 Run: `npm run verify:bulk -- --only=bulk`
-Expected: all six new checks FAIL — the first with a missing `Logo x Ubicación` header, since `buildRows` currently falls through to the costo renderer.
+Expected: all seven new checks FAIL — the first with a missing `Logo x Ubicación` header, since `buildRows` currently falls through to the costo renderer.
 
 - [ ] **Step 3: Add bulk flags to the constructor**
 
@@ -381,7 +394,36 @@ and make `hasLogo` false in bulk mode, so the logo grid updater never runs:
     this.hasLogo = !this.isPvpMode && !this.isBulkMode && root.getAttribute('data-has-logo') !== 'false';
 ```
 
-- [ ] **Step 4: Dispatch the three renderers**
+- [ ] **Step 4: Keep bulk engines from reaching outside their root**
+
+This is what makes two engines on one page safe, and it is why no scoping attribute is needed: a bulk engine has no PVP field, no setup field, and no save or refresh button of its own — its host owns those. In `cacheDom`, replace the two trailing lookups:
+
+```js
+    var isBulk = r.getAttribute('data-pricing-mode') === 'bulk';
+    this.pvpInput = isBulk ? null : document.querySelector('[data-pricing-pvp]');
+    this.setupInput = isBulk ? null : document.querySelector('[data-pricing-setup]');
+```
+
+Read the attribute from `r` rather than `this.isBulkMode` so the guard holds regardless of whether `cacheDom` runs before or after the constructor's flag assignments. In `bindEvents`, wrap the two trailing lookups — `bindEvents` runs after the constructor sets the flags, so `this.isBulkMode` is safe there:
+
+```js
+    if (!this.isBulkMode) {
+      var refreshBtn = document.querySelector('[data-pricing-refresh]');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', function () {
+          setTimeout(function () { self.updateAll(); }, 0);
+        });
+      }
+      var saveBtn = document.querySelector('[data-pricing-save]');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', function () { self.save(saveBtn); });
+      }
+    }
+```
+
+If `bindEvents` turns out to run before the flags are set, set the flags earlier rather than duplicating the attribute read.
+
+- [ ] **Step 5: Dispatch the three renderers**
 
 At the top of `buildRows`, replace the existing pvp guard:
 
@@ -421,7 +463,7 @@ At the top of `syncFromDom`:
     }
 ```
 
-- [ ] **Step 5: Write the bulk table renderer**
+- [ ] **Step 6: Write the bulk table renderer**
 
 Add these methods after `buildPvpRows`:
 
@@ -557,7 +599,7 @@ Add these methods after `buildPvpRows`:
   };
 ```
 
-- [ ] **Step 6: Fix the add-button selector**
+- [ ] **Step 7: Fix the add-button selector**
 
 `cacheDom` looks up `[data-role="add-row"]`, but every add button in the project is written
 `<button class="add-row" data-action="add-row">`. The lookup has therefore always returned `null`,
@@ -571,7 +613,7 @@ This also fixes the cap on `v6/editItem*.html`, which is a behaviour change on t
 intended one, since `MAX_FILAS` was already enforced in `addRow`; only the disabled state was
 missing.
 
-- [ ] **Step 7: Let the markup input trigger a refresh**
+- [ ] **Step 8: Let the markup input trigger a refresh**
 
 The `input` delegation in `bindEvents` already lists `.markup-input`, so no change is needed there. But `focusout` calls `commitMk` for `.markup-input`, which assumes the costo-mode view/edit pair. Guard it:
 
@@ -583,12 +625,12 @@ The `input` delegation in `bindEvents` already lists `.markup-input`, so no chan
 
 No guard is needed on the `.prod-input` branch — bulk mode renders no `.prod-input`.
 
-- [ ] **Step 8: Run to verify it passes**
+- [ ] **Step 9: Run to verify it passes**
 
 Run: `npm run verify:bulk`
-Expected: `13/13 checks passed`.
+Expected: `15/15 checks passed`.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
 git add v6/js-scripts/pricing-engine.js docs/fixtures/bulk-table.html docs/verify-bulk-cantidades.mjs
@@ -887,7 +929,7 @@ In the delegated click handler in `bindEvents`, add a case to the switch:
 - [ ] **Step 7: Run to verify it passes**
 
 Run: `npm run verify:bulk`
-Expected: `18/18 checks passed`.
+Expected: `20/20 checks passed`.
 
 - [ ] **Step 8: Commit**
 
@@ -1054,7 +1096,7 @@ At the end of `v6/styles/detalle-cotizacion.css`:
 - [ ] **Step 5: Run to verify it passes**
 
 Run: `npm run verify:bulk`
-Expected: `19/19 checks passed`.
+Expected: `21/21 checks passed`.
 
 - [ ] **Step 6: Commit**
 
@@ -1192,7 +1234,7 @@ In the script block at the bottom of `v6/detalle-cotizacion.html`, after `table-
 - [ ] **Step 7: Run to verify it passes**
 
 Run: `npm run verify:bulk`
-Expected: `22/22 checks passed`.
+Expected: `24/24 checks passed`.
 
 - [ ] **Step 8: Commit**
 
@@ -1323,7 +1365,7 @@ await check('saving applies the payload and flashes the targets', async () => {
 - [ ] **Step 2: Run to verify it fails**
 
 Run: `npm run verify:bulk`
-Expected: the six new checks FAIL, the first with `window.bulkCantidades is undefined`; the previous 22 still pass.
+Expected: the six new checks FAIL, the first with `window.bulkCantidades is undefined`; the previous 24 still pass.
 
 - [ ] **Step 3: Create the script**
 
@@ -1508,7 +1550,7 @@ In `shared/js-scripts/cotizacion-selection-toolbar.js`, replace the modal and of
 - [ ] **Step 6: Run to verify it passes**
 
 Run: `npm run verify:bulk`
-Expected: `28/28 checks passed`.
+Expected: `30/30 checks passed`.
 
 - [ ] **Step 7: Commit**
 
@@ -1898,7 +1940,7 @@ Append inside the IIFE of `v6/js-scripts/bulk-cantidades.js`, replacing its `DOM
 - [ ] **Step 6: Run to verify it passes**
 
 Run: `npm run verify:bulk`
-Expected: `34/34 checks passed`.
+Expected: `36/36 checks passed`.
 
 - [ ] **Step 7: Commit**
 
@@ -1964,7 +2006,7 @@ await check('v5 item pages keep working', async () => {
 - [ ] **Step 2: Run the full suite**
 
 Run: `npm run verify:bulk`
-Expected: `37/37 checks passed`. If the v5 checks fail, a shared-script guard is wrong — fix the guard, never the v5 markup.
+Expected: `39/39 checks passed`. If the v5 checks fail, a shared-script guard is wrong — fix the guard, never the v5 markup.
 
 - [ ] **Step 3: Document the command**
 

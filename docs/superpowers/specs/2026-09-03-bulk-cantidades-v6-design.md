@@ -96,9 +96,11 @@ zero, not as "leave alone".
 - `init()` switches from `querySelector` to `querySelectorAll`, constructing one `PricingEngine` per
   root, so `detalle-cotizacion.html` can host two instances (modal and offcanvas).
 - External-field wiring (`[data-pricing-pvp]`, `[data-pricing-setup]`, `[data-pricing-save]`,
-  `[data-pricing-refresh]`) is skipped entirely in bulk mode, and elsewhere is looked up within an
-  optional `data-pricing-scope` container instead of the whole document. Today these are bare
-  `document.querySelector` calls, which would cross-wire once a second engine exists on the page.
+  `[data-pricing-refresh]`) is skipped entirely in bulk mode. Today these are bare
+  `document.querySelector` calls, which would cross-wire once a second engine exists on the page;
+  since the only pages that host two engines host them both in bulk mode, skipping the wiring is
+  sufficient and no scoping attribute is introduced. A bulk engine has no PVP field, no setup field
+  and no save button of its own — its host owns those.
 - The instance is published on its root as `root.__pricingEngine`, which is how `bulk-cantidades.js`
   reaches it.
 - New public methods:
