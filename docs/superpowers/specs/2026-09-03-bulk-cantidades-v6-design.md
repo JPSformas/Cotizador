@@ -99,18 +99,23 @@ zero, not as "leave alone".
   `[data-pricing-refresh]`) is skipped entirely in bulk mode, and elsewhere is looked up within an
   optional `data-pricing-scope` container instead of the whole document. Today these are bare
   `document.querySelector` calls, which would cross-wire once a second engine exists on the page.
+- The instance is published on its root as `root.__pricingEngine`, which is how `bulk-cantidades.js`
+  reaches it.
 - New public methods:
   - `getBulkPayload()` → `[{ cantidad, logoUnit, customMarkup, descs, fins }]`
   - `setBulkColumns({ logo, markup })` → toggles column visibility and rebuilds.
   - `resetBulkQuotes()` → restores the ladder from the inline JSON.
-- Saving in bulk mode dispatches a `pricing-bulk-apply` CustomEvent carrying the payload. The engine
-  stays free of any knowledge of modals or offcanvases.
+  - `setBulkQuote(i, data)` / `addBulkQuote(data)` → used by the mobile nested panel.
+- The engine has no save path in bulk mode and knows nothing about modals or offcanvases:
+  `bulk-cantidades.js` owns the Guardar button and calls `getBulkPayload()` when it is clicked. The
+  one event the engine emits is `pricing-bulk-edit-row` (detail `{ index }`), fired when a card's
+  Editar button is pressed, since only the host knows the nested panel exists.
 
 ### New file: `v6/js-scripts/bulk-cantidades.js`
 
 Owns everything surface-specific: resolving the target items, calling `setBulkColumns` and
 `resetBulkQuotes` before each open, writing the context banner, driving the mobile nested panel, and
-handling `pricing-bulk-apply`.
+applying `getBulkPayload()` when Guardar cambios is clicked.
 
 `v6/detalle-cotizacion.html` additionally loads `styles/pricing-table.css` and
 `js-scripts/pricing-engine.js`, which it does not currently include.
