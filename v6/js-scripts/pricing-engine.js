@@ -176,6 +176,7 @@
     this.el = {
       head: r.querySelector('[data-role="pricing-head"]'),
       body: r.querySelector('[data-role="pricing-body"]'),
+      cards: r.querySelector('[data-role="pricing-cards"]'),
       grid: r.querySelector('[data-role="logo-grid"]'),
       addBtn: r.querySelector('[data-action="add-row"]'),
       colores: r.querySelector('[data-role="colores"]'),
@@ -250,6 +251,12 @@
         case 'edit-mk': self.editMk(i); break;
         case 'mk-btn': self.mkBtn(i); break;
         case 'remove-row': self.removeRow(i); break;
+        case 'edit-card':
+          r.dispatchEvent(new CustomEvent('pricing-bulk-edit-row', {
+            detail: { index: i },
+            bubbles: true
+          }));
+          break;
         case 'add-row': self.addRow(); break;
         case 'add-col': self.addCol(t.getAttribute('data-field')); break;
         case 'remove-col': self.removeCol(t.getAttribute('data-field')); break;
@@ -524,6 +531,10 @@
   };
 
   PricingEngine.prototype.buildBulkRows = function () {
+    if (this.bulkView === 'cards') {
+      this.buildBulkCards();
+      return;
+    }
     if (this.el.head) {
       this.el.head.innerHTML = '<tr>'
         + '<th rowspan="2">Cantidad</th>'
@@ -570,6 +581,10 @@
   };
 
   PricingEngine.prototype.updateBulkRows = function () {
+    if (this.bulkView === 'cards') {
+      this.updateBulkCards();
+      return;
+    }
     var self = this;
     var base = (this.quotes[0] && this.quotes[0].logoUnit != null) ? this.quotes[0].logoUnit : null;
 
@@ -600,6 +615,118 @@
         else hint.textContent = (q.logoUnit == null && base != null) ? 'heredado' : '';
       }
     });
+  };
+
+  PricingEngine.prototype.cascadeText = function (arr, kind) {
+    if (!arr.length) return '—';
+    var isDesc = kind === 'desc';
+    var chain = arr.map(function (v) { return v + '%'; }).join(' + ');
+    var factor = 1;
+    arr.forEach(function (v) { factor *= isDesc ? (1 - v / 100) : (1 + v / 100); });
+    var eff = isDesc ? (1 - factor) : (factor - 1);
+    return (arr.length > 1) ? (chain + ' (efect. ' + fmtPct(eff) + ')') : chain;
+  };
+
+  PricingEngine.prototype.buildBulkCards = function () {
+    if (!this.el.cards) return;
+
+    this.el.cards.innerHTML = this.quotes.map(function (q, i) {
+      var logoLine = this.showLogoCol
+        ? '<div class="fieldLabel">Logo x Ubicación: <span class="fieldValue" data-role="card-logo"></span></div>'
+        : '';
+      var markupLine = this.showMarkupCol
+        ? '<div class="fieldLabel">Markup: <span class="fieldValue" data-role="card-markup"></span></div>'
+        : '';
+      return '<div class="quantities-card" data-i="' + i + '">'
+        + '<div class="fieldLabel">Cantidad: <span class="fieldValue" data-role="card-cantidad"></span></div>'
+        + logoLine
+        + markupLine
+        + '<div class="fieldLabel">Desc.: <span class="fieldValue" data-role="card-desc"></span></div>'
+        + '<div class="fieldLabel">Fin.: <span class="fieldValue" data-role="card-fin"></span></div>'
+        + '<div class="action-buttons">'
+        + '<button type="button" class="edit-btn-mobile" data-action="edit-card" data-i="' + i + '"><span>Editar</span></button>'
+        + '<button type="button" class="delete-btn-mobile" data-action="remove-row" data-i="' + i + '"'
+        + (this.quotes.length <= 1 ? ' disabled' : '') + '><span>Eliminar</span></button>'
+        + '</div>'
+        + '</div>';
+    }, this).join('');
+
+    if (this.el.addBtn) this.el.addBtn.disabled = this.quotes.length >= MAX_FILAS;
+    this.updateBulkCards();
+  };
+
+  PricingEngine.prototype.updateBulkCards = function () {
+    if (!this.el.cards) return;
+    var self = this;
+    var base = (this.quotes[0] && this.quotes[0].logoUnit != null) ? this.quotes[0].logoUnit : null;
+
+    this.quotes.forEach(function (q, i) {
+      var card = self.el.cards.querySelector('.quantities-card[data-i="' + i + '"]');
+      if (!card) return;
+      var set = function (role, text) {
+        var el = card.querySelector('[data-role="' + role + '"]');
+        if (el) el.textContent = text;
+      };
+      set('card-cantidad', fmtQty(q.cantidad));
+      if (self.showLogoCol) {
+        var logoEff = (q.logoUnit != null) ? q.logoUnit : base;
+        set('card-logo', logoEff == null ? 'sin cambios' : (money(logoEff) + (q.logoUnit == null ? ' (heredado)' : '')));
+      }
+      if (self.showMarkupCol) {
+        set('card-markup', q.customMarkup == null ? 'sin cambios' : fmtMarkup(q.customMarkup));
+      }
+      set('card-desc', self.cascadeText(q.descs, 'desc'));
+      set('card-fin', self.cascadeText(q.fins, 'fin'));
+    });
+  };
+
+  PricingEngine.prototype.growCascades = function (data) {
+    var changed = false;
+    if (data.descs && data.descs.length > this.nDesc) {
+      this.nDesc = Math.min(MAX_PCT, data.descs.length);
+      changed = true;
+    }
+    if (data.fins && data.fins.length > this.nFin) {
+      this.nFin = Math.min(MAX_PCT, data.fins.length);
+      changed = true;
+    }
+    if (!changed) return;
+    this.quotes.forEach(function (q) {
+      while (q.descs.length < this.nDesc) q.descs.push(0);
+      while (q.fins.length < this.nFin) q.fins.push(0);
+    }, this);
+  };
+
+  PricingEngine.prototype.setBulkQuote = function (i, data) {
+    var q = this.quotes[i];
+    if (!q) return;
+    this.growCascades(data);
+    if (data.cantidad != null) q.cantidad = Math.max(0, data.cantidad);
+    q.logoUnit = (data.logoUnit == null || data.logoUnit === '') ? null : data.logoUnit;
+    q.customMarkup = (data.customMarkup == null || data.customMarkup === '') ? null : data.customMarkup;
+    if (data.descs) q.descs = data.descs.slice(0, this.nDesc);
+    if (data.fins) q.fins = data.fins.slice(0, this.nFin);
+    while (q.descs.length < this.nDesc) q.descs.push(0);
+    while (q.fins.length < this.nFin) q.fins.push(0);
+    this.buildRows();
+  };
+
+  PricingEngine.prototype.addBulkQuote = function (data) {
+    if (this.quotes.length >= MAX_FILAS) return;
+    this.growCascades(data || {});
+    this.quotes.push({
+      cantidad: (data && data.cantidad) || 0,
+      logoUnit: (data && data.logoUnit != null && data.logoUnit !== '') ? data.logoUnit : null,
+      customMarkup: (data && data.customMarkup != null && data.customMarkup !== '') ? data.customMarkup : null,
+      descs: (data && data.descs) ? data.descs.slice(0, this.nDesc) : zeros(this.nDesc),
+      fins: (data && data.fins) ? data.fins.slice(0, this.nFin) : zeros(this.nFin),
+      prodCost: null,
+      precioVolumen: null
+    });
+    var last = this.quotes[this.quotes.length - 1];
+    while (last.descs.length < this.nDesc) last.descs.push(0);
+    while (last.fins.length < this.nFin) last.fins.push(0);
+    this.buildRows();
   };
 
   PricingEngine.prototype.syncBulkFromDom = function () {

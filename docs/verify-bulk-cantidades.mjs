@@ -216,6 +216,74 @@ await check('resetBulkQuotes restores the default ladder', async () => {
   await page.close();
 });
 
+// --- Task 3: bulk card view ------------------------------------------------
+
+const CARDS_FIXTURE = 'docs/fixtures/bulk-cards.html';
+
+await check('bulk cards render one card per quantity', async () => {
+  const page = await open(CARDS_FIXTURE, { width: 390, height: 844 });
+  assert(page.errors.length === 0, 'page errors: ' + page.errors.join(' | '));
+  const cards = await page.$$eval('.quantities-card', (c) => c.length);
+  assert(cards === 3, 'expected 3 cards, got ' + cards);
+  const first = await page.$eval('.quantities-card', (c) => c.textContent);
+  for (const label of ['Cantidad', 'Logo x Ubicación', 'Markup', 'Desc.', 'Fin.']) {
+    assert(first.indexOf(label) !== -1, 'card missing ' + label);
+  }
+  assert(first.indexOf('Costo extra') === -1, 'Costo extra must not exist in v6');
+  await page.close();
+});
+
+await check('bulk cards show the cascade chain and effective value', async () => {
+  const page = await open(CARDS_FIXTURE, { width: 390, height: 844 });
+  await page.evaluate(() => {
+    const e = document.querySelector('[data-pricing-engine]').__pricingEngine;
+    e.setBulkQuote(0, { cantidad: 50, descs: [10, 5], fins: [0], logoUnit: null, customMarkup: null });
+  });
+  const text = await page.$eval('.quantities-card', (c) => c.textContent);
+  assert(text.indexOf('10% + 5%') !== -1, 'expected the cascade chain, got ' + text);
+  assert(text.indexOf('14,5%') !== -1, 'expected the effective value, got ' + text);
+  await page.close();
+});
+
+await check('card Editar emits pricing-bulk-edit-row', async () => {
+  const page = await open(CARDS_FIXTURE, { width: 390, height: 844 });
+  await page.evaluate(() => {
+    window.__edited = null;
+    document.querySelector('[data-pricing-engine]')
+      .addEventListener('pricing-bulk-edit-row', (e) => { window.__edited = e.detail.index; });
+  });
+  await page.click('.quantities-card[data-i="1"] .edit-btn-mobile');
+  const index = await page.evaluate(() => window.__edited);
+  assert(index === 1, 'expected index 1, got ' + index);
+  await page.close();
+});
+
+await check('addBulkQuote respects the 5-row cap', async () => {
+  const page = await open(CARDS_FIXTURE, { width: 390, height: 844 });
+  await page.evaluate(() => {
+    const e = document.querySelector('[data-pricing-engine]').__pricingEngine;
+    for (let i = 0; i < 5; i++) e.addBulkQuote({ cantidad: 1000 + i, descs: [0], fins: [0] });
+  });
+  const cards = await page.$$eval('.quantities-card', (c) => c.length);
+  assert(cards === 5, 'expected the cap of 5 cards, got ' + cards);
+  await page.close();
+});
+
+await check('card Eliminar removes a quantity but never the last', async () => {
+  const page = await open(CARDS_FIXTURE, { width: 390, height: 844 });
+  await page.click('.quantities-card[data-i="0"] .delete-btn-mobile');
+  await page.waitForTimeout(100);
+  let cards = await page.$$eval('.quantities-card', (c) => c.length);
+  assert(cards === 2, 'expected 2 cards, got ' + cards);
+  for (let i = 0; i < 4; i++) {
+    const btn = await page.$('.quantities-card .delete-btn-mobile:not([disabled])');
+    if (btn) { await btn.click(); await page.waitForTimeout(80); }
+  }
+  cards = await page.$$eval('.quantities-card', (c) => c.length);
+  assert(cards === 1, 'expected 1 card remaining, got ' + cards);
+  await page.close();
+});
+
 // --- report ----------------------------------------------------------------
 
 await browser.close();
