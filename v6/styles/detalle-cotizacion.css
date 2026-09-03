@@ -1692,6 +1692,48 @@ textarea.form-control.info-adicional {
   }
 }
 
+/* Confirmación visual tras aplicar cantidades en bloque */
+.item-container.row-bulk-applied > td {
+  animation: bulk-applied-flash 1.2s ease-out;
+}
 
+@keyframes bulk-applied-flash {
+  0% { background-color: #d1e7dd; }
+  100% { background-color: transparent; }
+}
 
+/* Controles de cascada del panel anidado (mobile) */
+.nested-sidebar-body .pct-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nested-sidebar-body .pct-row .pct-remove {
+  border: 1px solid #cc9999;
+  background: #ffffff;
+  color: #a33;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.nested-sidebar-body .pct-group-add {
+  border: 1px dashed #339933;
+  background: #f4fbf0;
+  color: #339933;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  width: 100%;
+}
+
+.nested-sidebar-body .pct-group-hint {
+  font-size: 11px;
+  color: #6c757d;
+  margin-top: 4px;
+}
 

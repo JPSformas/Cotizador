@@ -26,7 +26,7 @@ function assert(cond, msg) {
 }
 
 async function check(name, fn) {
-  if (only && !name.includes(only)) return;
+  if (only && !name.toLowerCase().includes(only.toLowerCase())) return;
   try {
     await fn();
     results.push({ ok: true, name });
@@ -281,6 +281,27 @@ await check('card Eliminar removes a quantity but never the last', async () => {
   }
   cards = await page.$$eval('.quantities-card', (c) => c.length);
   assert(cards === 1, 'expected 1 card remaining, got ' + cards);
+  await page.close();
+});
+
+// --- Task 4: bulk cell styling ---------------------------------------------
+
+await check('bulk logo and markup inputs are styled as plain overrides', async () => {
+  const page = await open(BULK_FIXTURE);
+  const logo = await page.$eval('.lp-input[data-i="0"]', (el) => {
+    const s = getComputedStyle(el);
+    return { align: s.textAlign, width: parseInt(s.width, 10) };
+  });
+  assert(logo.align === 'right', 'logo input should be right-aligned, got ' + logo.align);
+  assert(logo.width > 60, 'logo input looks unstyled, width ' + logo.width);
+  const markup = await page.$eval('.markup-input[data-i="0"]', (el) => {
+    const s = getComputedStyle(el);
+    return { shadow: s.boxShadow, align: s.textAlign };
+  });
+  assert(markup.shadow === 'none', 'bulk markup must not use the green editing glow');
+  assert(markup.align === 'right', 'bulk markup should be right-aligned, got ' + markup.align);
+  const hint = await page.$eval('tr[data-i="0"] .lp-bulk-hint', (el) => el.textContent.trim());
+  assert(hint === 'base', 'first row should be captioned base, got ' + hint);
   await page.close();
 });
 
