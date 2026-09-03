@@ -172,16 +172,40 @@ it to all of them; desktop says this in a tooltip, mobile needs a caption under 
 `Se agrega para todas las cantidades`.
 
 The card list also drops its `data-table-empty-mobile` / `data-empty-group="cantidades-cotizacion"`
-hooks, for the same reason the desktop table does. This matters beyond the empty state:
-`table-empty-state.js` currently owns card deletion — it intercepts `.delete-btn-mobile` clicks,
-animates the card out, and mirrors the removal into the table sharing the same `data-empty-group`.
-With both surfaces engine-rendered, deletion belongs to the engine, and leaving the attributes in
-place would delete each row twice.
+hooks, for the same reason the desktop table does.
 
 `shared/js-scripts/sidebar-nested.js` is shared with v5 and cannot grow v6-only behaviour. The v6
 offcanvas is marked `data-bulk-managed` and the shared script bails out when it sees that attribute,
 leaving nested-panel control to `bulk-cantidades.js`. The same guard applies to
 `updateSelectionContext` in `shared/js-scripts/cotizacion-selection-toolbar.js`.
+
+## Deletion ownership
+
+The engine owns deletion of quantity rows and quantity cards; `table-empty-state.js` keeps owning
+deletion of product rows in the items table. That split requires no edit to `table-empty-state.js` —
+it falls out of removing the empty-state attributes.
+
+Its `bindDeleteButtons` is a single document-level listener on `.delete-btn, .delete-btn-mobile`
+whose branches are gated on exactly those attributes:
+
+- product rows match on `row.classList.contains("item-container")` — unaffected;
+- quantity rows match on `btn.classList.contains("delete-btn") && row.closest("[data-table-empty]")`;
+- quantity cards match on `card.closest("[data-table-empty-mobile]")`.
+
+Once the modal table and the card list lose those attributes, the last two branches stop matching
+and the listener falls through without calling `preventDefault`, leaving the clicks to the engine.
+The desktop engine trash button never matched anyway: it is `.trash-btn` with
+`data-action="remove-row"`. The mobile card renderer may therefore keep the `.delete-btn-mobile`
+class for its `.action-buttons` styling without risking a double removal.
+
+The behaviour that is intentionally lost is `syncGroup`, which today mirrors a deletion in the modal
+table into the card list sharing the same `data-empty-group`. That mirroring is redundant once the
+two surfaces are independent engine instances.
+
+On the add side there is nothing to unwire: `#agregarCantidadDesktop` and `#btnAgregarCantidadNested`
+have no handlers on this page — the only binding for that id lives in `select-image-modal.js`, which
+`detalle-cotizacion.html` does not load — and `add-quantity-manager.js` is scoped to `.quantity-card`
+/ `#quantitiesContainer` in the Producto Manual modal, a different class from `.quantities-card`.
 
 ## Targeting and adaptation
 
