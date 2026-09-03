@@ -305,6 +305,41 @@ await check('bulk logo and markup inputs are styled as plain overrides', async (
   await page.close();
 });
 
+// --- Task 5: desktop modal -------------------------------------------------
+
+await check('desktop modal hosts the bulk engine', async () => {
+  const page = await open('v6/detalle-cotizacion.html');
+  assert(page.errors.length === 0, 'page errors: ' + page.errors.join(' | '));
+  await page.click('#btnCotizarRapido');
+  await page.waitForSelector('#modalMasElementos.show', { timeout: 3000 });
+  const heads = await page.$$eval('#modalMasElementos [data-role="pricing-head"] th', (th) =>
+    th.map((e) => e.textContent.trim())
+  );
+  for (const label of ['Cantidad', 'Logo x Ubicación', 'Markup', 'Ajustes comerciales']) {
+    assert(heads.some((h) => h.startsWith(label)), 'missing header ' + label + ' in ' + JSON.stringify(heads));
+  }
+  const stale = await page.$$eval('#modalMasElementos', (m) => m[0].textContent);
+  assert(stale.indexOf('Costo extra') === -1, 'Costo extra still present');
+  assert(stale.indexOf('Margen') === -1, 'Margen still present');
+  await page.close();
+});
+
+await check('desktop modal is xl and drops the empty-state hooks', async () => {
+  const page = await open('v6/detalle-cotizacion.html');
+  const xl = await page.$eval('#modalMasElementos .modal-dialog', (d) => d.classList.contains('modal-xl'));
+  assert(xl, 'dialog should be modal-xl');
+  const hooks = await page.$$eval('#modalMasElementos [data-table-empty], #modalMasElementos [data-table-empty-mobile]', (e) => e.length);
+  assert(hooks === 0, 'empty-state hooks must be removed, found ' + hooks);
+  await page.close();
+});
+
+await check('v6 items table keeps its own empty state', async () => {
+  const page = await open('v6/detalle-cotizacion.html');
+  const hook = await page.$$eval('[data-empty-type="products"]', (e) => e.length);
+  assert(hook === 1, 'the products table must keep data-table-empty');
+  await page.close();
+});
+
 // --- report ----------------------------------------------------------------
 
 await browser.close();
