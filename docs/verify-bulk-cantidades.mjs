@@ -571,6 +571,50 @@ await check('v5 item pages keep working', async () => {
   }
 });
 
+await check('mobile Agregar cantidades disables at 5 cards', async () => {
+  const page = await open('v6/detalle-cotizacion.html', MOBILE);
+  await page.click('#btnCotizarRapidoMobile');
+  await page.waitForSelector('#sidebarMasElementos.show');
+  for (let i = 0; i < 2; i++) {
+    await page.click('#btnAgregarCantidades');
+    await page.waitForSelector('#nestedSidebar.show');
+    await page.fill('#nestedCantidad', String(300 + i));
+    await page.click('#btnAgregarCantidadNested');
+    await page.waitForTimeout(200);
+  }
+  const cards = await page.$$eval('#sidebarMasElementos .quantities-card', (c) => c.length);
+  assert(cards === 5, 'expected 5 cards, got ' + cards);
+  const disabled = await page.$eval('#btnAgregarCantidades', (b) => b.disabled);
+  assert(disabled, 'Agregar cantidades should be disabled at 5 cards');
+  await page.click('#btnAgregarCantidades', { force: true });
+  await page.waitForTimeout(200);
+  const nestedOpen = await page.$eval('#nestedSidebar', (n) => n.classList.contains('show'));
+  assert(!nestedOpen, 'nested sidebar must not open at the 5-card cap');
+  await page.close();
+});
+
+await check('mobile nested cascade remove shrinks the column globally', async () => {
+  const page = await open('v6/detalle-cotizacion.html', MOBILE);
+  await page.click('#btnCotizarRapidoMobile');
+  await page.waitForSelector('#sidebarMasElementos.show');
+  await page.click('.quantities-card[data-i="0"] .edit-btn-mobile');
+  await page.waitForSelector('#nestedSidebar.show');
+  await page.click('#nestedAddDesc');
+  await page.fill('#nestedDescGroup .pct-row:nth-child(1) input', '10');
+  await page.fill('#nestedDescGroup .pct-row:nth-child(2) input', '5');
+  await page.click('#btnAgregarCantidadNested');
+  await page.waitForTimeout(200);
+  await page.click('.quantities-card[data-i="0"] .edit-btn-mobile');
+  await page.waitForSelector('#nestedSidebar.show');
+  await page.click('#nestedDescGroup .pct-remove');
+  await page.click('#btnAgregarCantidadNested');
+  await page.waitForTimeout(200);
+  const card = await page.$eval('.quantities-card[data-i="0"]', (c) => c.textContent);
+  assert(card.indexOf('10% +') === -1, 'cascade column should be gone, got ' + card);
+  assert(card.indexOf('10%') !== -1, 'remaining desc should be 10%, got ' + card);
+  await page.close();
+});
+
 // --- report ----------------------------------------------------------------
 
 await browser.close();

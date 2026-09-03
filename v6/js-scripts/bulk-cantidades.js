@@ -137,6 +137,27 @@
     host.querySelectorAll('.pct-remove').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var vals = pctRows(groupId).map(function (i) { return Number(i.value) || 0; });
+        var group = document.getElementById(groupId);
+        var field = group ? group.getAttribute('data-field') : null;
+        var n = 0;
+        if (nested.engine && field) n = (field === 'descs') ? nested.engine.nDesc : nested.engine.nFin;
+        if (nested.engine && field && vals.length <= n && vals.length > 1) {
+          if (nested.index != null) {
+            nested.engine.setBulkQuote(nested.index, {
+              cantidad: Number(document.getElementById('nestedCantidad').value) || 0,
+              logoUnit: parseField(document.getElementById('nestedLogo').value),
+              customMarkup: parseField(document.getElementById('nestedMarkup').value),
+              descs: readPct('nestedDescGroup'),
+              fins: readPct('nestedFinGroup')
+            });
+          }
+          nested.engine.removeCol(field);
+          var payload = nested.engine.getBulkPayload();
+          var q = (nested.index != null) ? payload[nested.index] : payload[0];
+          renderPctRows('nestedDescGroup', q.descs);
+          renderPctRows('nestedFinGroup', q.fins);
+          return;
+        }
         vals.splice(Number(btn.getAttribute('data-j')), 1);
         renderPctRows(groupId, vals);
       });
@@ -159,6 +180,7 @@
 
   function openNested(engine, index) {
     if (!engine) return;
+    if (index == null && engine.getBulkPayload().length >= 5) return;
     nested.engine = engine;
     nested.index = index;
 
@@ -196,8 +218,12 @@
       descs: readPct('nestedDescGroup'),
       fins: readPct('nestedFinGroup')
     };
-    if (nested.index == null) nested.engine.addBulkQuote(data);
-    else nested.engine.setBulkQuote(nested.index, data);
+    if (nested.index == null) {
+      if (nested.engine.getBulkPayload().length >= 5) return;
+      nested.engine.addBulkQuote(data);
+    } else {
+      nested.engine.setBulkQuote(nested.index, data);
+    }
     closeNested();
   }
 

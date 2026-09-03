@@ -652,6 +652,8 @@
     }, this).join('');
 
     if (this.el.addBtn) this.el.addBtn.disabled = this.quotes.length >= MAX_FILAS;
+    var btnAgregarCantidades = document.getElementById('btnAgregarCantidades');
+    if (btnAgregarCantidades) btnAgregarCantidades.disabled = this.quotes.length >= MAX_FILAS;
     this.updateBulkCards();
   };
 
