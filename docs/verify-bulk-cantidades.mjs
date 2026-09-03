@@ -433,6 +433,111 @@ await check('saving applies the payload and flashes the targets', async () => {
   await page.close();
 });
 
+// --- Task 7: mobile offcanvas ----------------------------------------------
+
+const MOBILE = { width: 390, height: 844 };
+
+await check('mobile offcanvas lists engine-rendered cards', async () => {
+  const page = await open('v6/detalle-cotizacion.html', MOBILE);
+  assert(page.errors.length === 0, 'page errors: ' + page.errors.join(' | '));
+  await page.click('#btnCotizarRapidoMobile');
+  await page.waitForSelector('#sidebarMasElementos.show');
+  const cards = await page.$$eval('#sidebarMasElementos .quantities-card', (c) => c.length);
+  assert(cards === 3, 'expected 3 cards, got ' + cards);
+  const text = await page.$eval('#sidebarMasElementos .quantities-card', (c) => c.textContent);
+  assert(text.indexOf('Logo x Ubicación') !== -1, 'card should list Logo x Ubicación');
+  assert(text.indexOf('Costo extra') === -1, 'Costo extra must not exist in v6');
+  await page.close();
+});
+
+await check('mobile nested panel adds a quantity', async () => {
+  const page = await open('v6/detalle-cotizacion.html', MOBILE);
+  await page.click('#btnCotizarRapidoMobile');
+  await page.waitForSelector('#sidebarMasElementos.show');
+  await page.click('#btnAgregarCantidades');
+  await page.waitForSelector('#nestedSidebar.show');
+  await page.fill('#nestedCantidad', '750');
+  await page.click('#btnAgregarCantidadNested');
+  await page.waitForTimeout(200);
+  const cards = await page.$$eval('#sidebarMasElementos .quantities-card', (c) => c.length);
+  assert(cards === 4, 'expected 4 cards after adding, got ' + cards);
+  const last = await page.$eval('#sidebarMasElementos .quantities-card[data-i="3"]', (c) => c.textContent);
+  assert(last.indexOf('750') !== -1, 'new card should show 750, got ' + last);
+  await page.close();
+});
+
+await check('mobile nested panel edits an existing quantity', async () => {
+  const page = await open('v6/detalle-cotizacion.html', MOBILE);
+  await page.click('#btnCotizarRapidoMobile');
+  await page.waitForSelector('#sidebarMasElementos.show');
+  await page.click('.quantities-card[data-i="1"] .edit-btn-mobile');
+  await page.waitForSelector('#nestedSidebar.show');
+  const title = await page.$eval('#nestedSidebarTitle', (t) => t.textContent.trim());
+  assert(title === 'Editar cantidad', 'expected the edit title, got ' + title);
+  const prefill = await page.$eval('#nestedCantidad', (i) => i.value);
+  assert(prefill === '100', 'expected prefill 100, got ' + prefill);
+  await page.fill('#nestedCantidad', '150');
+  await page.click('#btnAgregarCantidadNested');
+  await page.waitForTimeout(200);
+  const card = await page.$eval('.quantities-card[data-i="1"]', (c) => c.textContent);
+  assert(card.indexOf('150') !== -1, 'card should show 150, got ' + card);
+  const cards = await page.$$eval('.quantities-card', (c) => c.length);
+  assert(cards === 3, 'editing must not add a card, got ' + cards);
+  await page.close();
+});
+
+await check('mobile cascade button adds a column for every quantity', async () => {
+  const page = await open('v6/detalle-cotizacion.html', MOBILE);
+  await page.click('#btnCotizarRapidoMobile');
+  await page.waitForSelector('#sidebarMasElementos.show');
+  await page.click('.quantities-card[data-i="0"] .edit-btn-mobile');
+  await page.waitForSelector('#nestedSidebar.show');
+  await page.click('#nestedAddDesc');
+  const fields = await page.$$eval('#nestedDescGroup .pct-row', (r) => r.length);
+  assert(fields === 2, 'expected 2 desc fields, got ' + fields);
+  const hint = await page.$eval('#nestedDescGroup .pct-group-hint', (h) => h.textContent.trim());
+  assert(hint === 'Se agrega para todas las cantidades', 'missing the global-cascade caption, got ' + hint);
+  await page.fill('#nestedDescGroup .pct-row:nth-child(1) input', '10');
+  await page.fill('#nestedDescGroup .pct-row:nth-child(2) input', '5');
+  await page.click('#btnAgregarCantidadNested');
+  await page.waitForTimeout(200);
+  const card = await page.$eval('.quantities-card[data-i="0"]', (c) => c.textContent);
+  assert(card.indexOf('10% + 5%') !== -1, 'expected the cascade chain, got ' + card);
+  await page.close();
+});
+
+// Este es el chequeo clave de "quién es dueño del borrado": en la página real
+// table-empty-state.js sí está cargado, y sin el guard borraría la card por su
+// cuenta además del motor.
+await check('mobile card deletion removes exactly one card', async () => {
+  const page = await open('v6/detalle-cotizacion.html', MOBILE);
+  await page.click('#btnCotizarRapidoMobile');
+  await page.waitForSelector('#sidebarMasElementos.show');
+  await page.click('.quantities-card[data-i="1"] .delete-btn-mobile');
+  await page.waitForTimeout(300);
+  const cards = await page.$$eval('#sidebarMasElementos .quantities-card', (c) => c.length);
+  assert(cards === 2, 'expected exactly one card removed (3 -> 2), got ' + cards);
+  const cantidades = await page.$$eval('#sidebarMasElementos [data-role="card-cantidad"]', (e) =>
+    e.map((n) => n.textContent.trim())
+  );
+  assert(cantidades.join(',') === '50,200', 'wrong card removed: ' + cantidades.join(','));
+  await page.close();
+});
+
+await check('mobile save applies and closes', async () => {
+  const page = await open('v6/detalle-cotizacion.html', MOBILE);
+  await page.click('#btnCotizarRapidoMobile');
+  await page.waitForSelector('#sidebarMasElementos.show');
+  await page.click('#bulkGuardarMobile');
+  await page.waitForTimeout(500);
+  const payload = await page.evaluate(() => window.bulkCantidades.getLastPayload());
+  assert(payload && payload.rows.length === 3, 'expected a 3-row payload');
+  assert(payload.targets.length === 4, 'Cotizar rápido should target all 4 items');
+  const shown = await page.$eval('#sidebarMasElementos', (o) => o.classList.contains('show'));
+  assert(!shown, 'offcanvas should close after saving');
+  await page.close();
+});
+
 // --- report ----------------------------------------------------------------
 
 await browser.close();

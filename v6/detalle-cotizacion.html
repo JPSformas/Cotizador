@@ -850,118 +850,82 @@
     </div>
 
     <!-- Sidebar para Cargar cantidades (Mobile) -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarMasElementos" aria-labelledby="sidebarMasElementosLabel">
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarMasElementos" aria-labelledby="sidebarMasElementosLabel" data-bulk-managed>
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="sidebarMasElementosLabel">Cargar cantidades</h5>
             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body p-0">
-            <!-- Contenido scrollable -->
             <div class="sidebar-content">
-                <!-- Contexto de selección -->
                 <div class="selection-context mb-3" id="sidebarMasElementosContext">
                     <i class="fas fa-check-square me-2"></i>
                     <span class="selection-context-text">Se aplicará a <strong>0 ítems seleccionados</strong></span>
                 </div>
-                <div class="d-grid gap-2">
-                    <button class="btn btn-outline-secondary mb-2" type="button" id="btnAgregarCantidades">
+                <div class="pricing-engine" data-pricing-engine data-pricing-mode="bulk" data-pricing-view="cards">
+                    <script type="application/json" data-role="pricing-quotes">
+                    [
+                      { "cantidad": 50,  "descs": [0], "fins": [0] },
+                      { "cantidad": 100, "descs": [0], "fins": [0] },
+                      { "cantidad": 200, "descs": [0], "fins": [0] }
+                    ]
+                    </script>
+                    <button class="btn btn-outline-secondary mb-2 w-100" type="button" id="btnAgregarCantidades">
                         Agregar cantidades
                     </button>
-                    <div class="saved-quantities mb-3" data-table-empty-mobile data-empty-type="quantities" data-empty-group="cantidades-cotizacion">
-                        <div class="quantities-card">
-                            <div class="fieldLabel" >Cantidad: <span class="fieldValue">50</span></div>
-                            <div class="fieldLabel" >Costo extra: <span class="fieldValue"></span></div>
-                            <div class="fieldLabel" >Margen: <span class="fieldValue"></span></div>
-                            <div class="fieldLabel" >Descuento: <span class="fieldValue"></span></div>
-                            <div class="fieldLabel" >Financiación: <span class="fieldValue"></span></div>
-                            <div class="action-buttons">
-                            <button href="" class="edit-btn-mobile" data-itemid="#"><span>Editar</span></button>
-                            <button type="button" class="delete-btn-mobile"><span>Eliminar</span></button>
-                            </div>
-                        </div>
-                        <div class="quantities-card">
-                            <div class="fieldLabel" >Cantidad: <span class="fieldValue">100</span></div>
-                            <div class="fieldLabel" >Costo extra: <span class="fieldValue"></span></div>
-                            <div class="fieldLabel" >Margen: <span class="fieldValue"></span></div>
-                            <div class="fieldLabel" >Descuento: <span class="fieldValue"></span></div>
-                            <div class="fieldLabel" >Financiación: <span class="fieldValue"></span></div>
-                            <div class="action-buttons">
-                            <button href="" class="edit-btn-mobile" data-itemid="#"><span>Editar</span></button>
-                            <button type="button" class="delete-btn-mobile"><span>Eliminar</span></button>
-                            </div>
-                        </div>
-                        <div class="quantities-card">
-                            <div class="fieldLabel" >Cantidad: <span class="fieldValue">200</span></div>
-                            <div class="fieldLabel" >Costo extra: <span class="fieldValue"></span></div>
-                            <div class="fieldLabel" >Margen: <span class="fieldValue"></span></div>
-                            <div class="fieldLabel" >Descuento: <span class="fieldValue"></span></div>
-                            <div class="fieldLabel" >Financiación: <span class="fieldValue"></span></div>
-                            <div class="action-buttons">
-                            <button href="" class="edit-btn-mobile" data-itemid="#"><span>Editar</span></button>
-                            <button type="button" class="delete-btn-mobile"><span>Eliminar</span></button>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="saved-quantities mb-3" data-role="pricing-cards"></div>
                 </div>
             </div>
-            
-            <!-- Sidebar anidado para Agregar Cantidades -->
+
+            <!-- Sidebar anidado: agrega y edita una cantidad -->
             <div class="nested-sidebar" id="nestedSidebar">
                 <div class="nested-sidebar-header">
                     <button type="button" class="btn-back" id="btnBackNestedSidebar">
                         <i class="fas fa-chevron-left"></i>
-                        <h5>Agregar cantidades</h5>
+                        <h5 id="nestedSidebarTitle">Agregar cantidades</h5>
                     </button>
                 </div>
                 <div class="nested-sidebar-body">
-                    <!-- Campos adicionales -->
                     <label class="form-label d-block w-100">
-                        <span>Cantidad</span> 
-                        <input type="number" class="form-control mt-2" name="colCotizacionCantidad" min="1" >
+                        <span>Cantidad</span>
+                        <input type="number" class="form-control mt-2" id="nestedCantidad" min="1">
                     </label>
-                    <label class="form-label d-block w-100">
-                        <span>Costo extra</span>
-                        <input type="text" class="form-control mt-2" name="colCotizacionCostoExtra">
-                    </label>
-                    <label class="form-label d-block w-100">
-                        <span>Margen</span>
+                    <label class="form-label d-block w-100" id="nestedLogoField">
+                        <span>Logo x Ubicación</span>
                         <div class="input-group mt-2">
-                            <input type="number" class="form-control" name="colCotizacionMargen" placeholder="0" inputmode="numeric">
-                            <span class="input-group-text">%</span>
+                            <span class="input-group-text">$</span>
+                            <input type="text" inputmode="numeric" class="form-control" id="nestedLogo">
                         </div>
                     </label>
-                    <label class="form-label d-block w-100">
-                        <span>Descuento</span>
-                        <div class="input-group mt-2">
-                            <input type="number" class="form-control" name="colCotizacionDescuento" placeholder="0" inputmode="numeric">
-                            <span class="input-group-text">%</span>
-                        </div>
+                    <label class="form-label d-block w-100" id="nestedMarkupField">
+                        <span>Markup</span>
+                        <input type="text" inputmode="numeric" class="form-control mt-2" id="nestedMarkup" placeholder="sin cambios">
                     </label>
-                    <label class="form-label d-block w-100">
-                        <span>Financiación</span>
-                        <div class="input-group mt-2">
-                            <input type="number" class="form-control" name="colCotizacionFinanciacion" placeholder="0" inputmode="numeric">
-                            <span class="input-group-text">%</span>
-                        </div>
-                    </label>
+                    <div class="mb-3" id="nestedDescGroup" data-field="descs">
+                        <span class="form-label d-block">Desc. adicional</span>
+                        <div class="pct-rows"></div>
+                        <button type="button" class="pct-group-add mt-2" id="nestedAddDesc">+ Agregar descuento en cascada</button>
+                        <div class="pct-group-hint">Se agrega para todas las cantidades</div>
+                    </div>
+                    <div class="mb-3" id="nestedFinGroup" data-field="fins">
+                        <span class="form-label d-block">Financiación</span>
+                        <div class="pct-rows"></div>
+                        <button type="button" class="pct-group-add mt-2" id="nestedAddFin">+ Agregar financiación en cascada</button>
+                        <div class="pct-group-hint">Se agrega para todas las cantidades</div>
+                    </div>
                 </div>
                 <div class="nested-sidebar-footer">
                     <button type="button" class="btn btn-outline-secondary w-100" id="btnAgregarCantidadNested">Agregar</button>
                 </div>
             </div>
         </div>
-        
-        <!-- Footer fijo del sidebar -->
+
         <div class="offcanvas-footer">
-            <!-- Mensaje de atención -->
             <div class="alert alert-warning mb-3" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                <strong>Atención:</strong> Al guardar, se actualizarán y reemplazarán las configuraciones previas.
+                <strong>Atención:</strong> Al guardar se reemplazan las cantidades de los ítems alcanzados. Los costos propios de cada ítem que dejes vacíos acá se conservan.
             </div>
-            
-            <!-- Botones principales del sidebar -->
             <div class="d-grid gap-2">
-                <button type="button" class="btn btn-primary" id="guardarCantidadesMobile">Guardar cambios</button>
+                <button type="button" class="btn btn-primary" id="bulkGuardarMobile">Guardar cambios</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="offcanvas">Cerrar</button>
             </div>
         </div>
