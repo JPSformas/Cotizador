@@ -340,6 +340,99 @@ await check('v6 items table keeps its own empty state', async () => {
   await page.close();
 });
 
+// --- Task 6: targeting and adaptation --------------------------------------
+
+async function openDetalleAndSelect(indexes) {
+  const page = await open('v6/detalle-cotizacion.html');
+  for (const i of indexes) {
+    await page.click('#item-' + i + ' .item-row-checkbox');
+  }
+  await page.waitForTimeout(150);
+  return page;
+}
+
+await check('Cotizar rápido targets every item with the global banner', async () => {
+  const page = await open('v6/detalle-cotizacion.html');
+  await page.click('#btnCotizarRapido');
+  await page.waitForSelector('#modalMasElementos.show');
+  const banner = await page.$eval('#modalMasElementosContext', (e) => ({
+    global: e.classList.contains('context-global'),
+    text: e.textContent.trim(),
+  }));
+  assert(banner.global, 'banner should use the context-global variant');
+  assert(banner.text.indexOf('todos los productos') !== -1, 'unexpected banner: ' + banner.text);
+  const count = await page.evaluate(() => window.bulkCantidades.getTargets().length);
+  assert(count === 4, 'expected all 4 items targeted, got ' + count);
+  await page.close();
+});
+
+await check('selection of two catalogo items shows both columns', async () => {
+  const page = await openDetalleAndSelect([1, 2]);
+  await page.click('#btnCargarCantidadesSeleccion');
+  await page.waitForSelector('#modalMasElementos.show');
+  const banner = await page.$eval('#modalMasElementosContext', (e) => e.textContent.trim());
+  assert(banner.indexOf('2 ítems seleccionados') !== -1, 'unexpected banner: ' + banner);
+  assert(banner.indexOf('no aplican') === -1, 'should not warn when no PVP item is targeted');
+  const heads = await page.$$eval('#modalMasElementos [data-role="pricing-head"] th', (th) => th.map((e) => e.textContent.trim()));
+  assert(heads.some((h) => h.startsWith('Logo')), 'logo column expected');
+  assert(heads.some((h) => h.startsWith('Markup')), 'markup column expected');
+  await page.close();
+});
+
+await check('mixed selection keeps the columns and warns', async () => {
+  const page = await openDetalleAndSelect([1, 4]);
+  await page.click('#btnCargarCantidadesSeleccion');
+  await page.waitForSelector('#modalMasElementos.show');
+  const banner = await page.$eval('#modalMasElementosContext', (e) => e.textContent.trim());
+  assert(banner.indexOf('no aplican a 1') !== -1, 'expected the skip note, got ' + banner);
+  const heads = await page.$$eval('#modalMasElementos [data-role="pricing-head"] th', (th) => th.map((e) => e.textContent.trim()));
+  assert(heads.some((h) => h.startsWith('Logo')), 'logo column expected in a mixed target');
+  await page.close();
+});
+
+await check('PVP-only selection hides logo and markup', async () => {
+  const page = await openDetalleAndSelect([4]);
+  await page.click('#btnCargarCantidadesSeleccion');
+  await page.waitForSelector('#modalMasElementos.show');
+  const heads = await page.$$eval('#modalMasElementos [data-role="pricing-head"] th', (th) => th.map((e) => e.textContent.trim()));
+  assert(!heads.some((h) => h.startsWith('Logo')), 'logo column should be hidden');
+  assert(!heads.some((h) => h.startsWith('Markup')), 'markup column should be hidden');
+  assert(heads.some((h) => h.startsWith('Cantidad')), 'cantidad must survive');
+  await page.close();
+});
+
+await check('reopening resets the ladder', async () => {
+  const page = await open('v6/detalle-cotizacion.html');
+  await page.click('#btnCotizarRapido');
+  await page.waitForSelector('#modalMasElementos.show');
+  await page.click('#modalMasElementos [data-action="add-row"]');
+  await page.click('#modalMasElementos [data-bs-dismiss="modal"].btn-secondary');
+  await page.waitForTimeout(500);
+  await page.click('#btnCotizarRapido');
+  await page.waitForSelector('#modalMasElementos.show');
+  const rows = await page.$$eval('#modalMasElementos [data-role="pricing-body"] tr', (r) => r.length);
+  assert(rows === 3, 'expected the ladder reset to 3 rows, got ' + rows);
+  await page.close();
+});
+
+await check('saving applies the payload and flashes the targets', async () => {
+  const page = await openDetalleAndSelect([1, 2]);
+  await page.click('#btnCargarCantidadesSeleccion');
+  await page.waitForSelector('#modalMasElementos.show');
+  await page.fill('#modalMasElementos .cantidad[data-i="0"]', '250');
+  await page.fill('#modalMasElementos .lp-input[data-i="0"]', '500');
+  await page.click('#bulkGuardarDesktop');
+  await page.waitForTimeout(300);
+  const payload = await page.evaluate(() => window.bulkCantidades.getLastPayload());
+  assert(payload.rows[0].cantidad === 250, 'expected cantidad 250, got ' + payload.rows[0].cantidad);
+  assert(payload.rows[0].logoUnit === 500, 'expected logoUnit 500, got ' + payload.rows[0].logoUnit);
+  assert(payload.rows[1].logoUnit === null, 'row 1 logo should stay null');
+  assert(payload.targets.length === 2, 'expected 2 targets, got ' + payload.targets.length);
+  const open2 = await page.$eval('#modalMasElementos', (m) => m.classList.contains('show'));
+  assert(!open2, 'modal should close after saving');
+  await page.close();
+});
+
 // --- report ----------------------------------------------------------------
 
 await browser.close();
