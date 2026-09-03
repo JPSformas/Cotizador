@@ -180,8 +180,10 @@
       ubicVal: r.querySelector('[data-role="ubic-val"]'),
       costoHint: r.querySelector('[data-role="costo-producto-hint"]')
     };
-    this.pvpInput = document.querySelector('[data-pricing-pvp]');
-    this.setupInput = document.querySelector('[data-pricing-setup]');
+    var scopeSel = r.getAttribute('data-pricing-scope');
+    this.scope = scopeSel ? (document.querySelector(scopeSel) || document) : document;
+    this.pvpInput = this.scope.querySelector('[data-pricing-pvp]');
+    this.setupInput = this.scope.querySelector('[data-pricing-setup]');
   };
 
   PricingEngine.prototype.getPvp = function () {
@@ -273,13 +275,13 @@
       this.setupInput.addEventListener('input', function () { self.updateAll(); });
     }
     // Recompute after the PVP refresh mock rewrites the field programmatically.
-    var refreshBtn = document.querySelector('[data-pricing-refresh]');
+    var refreshBtn = this.scope.querySelector('[data-pricing-refresh]');
     if (refreshBtn) {
       refreshBtn.addEventListener('click', function () {
         setTimeout(function () { self.updateAll(); }, 0);
       });
     }
-    var saveBtn = document.querySelector('[data-pricing-save]');
+    var saveBtn = this.scope.querySelector('[data-pricing-save]');
     if (saveBtn) {
       saveBtn.addEventListener('click', function () { self.save(saveBtn); });
     }
@@ -817,8 +819,11 @@
   };
 
   function init() {
-    var root = document.querySelector('[data-pricing-engine]');
-    if (root) new PricingEngine(root);
+    var roots = document.querySelectorAll('[data-pricing-engine]');
+    for (var i = 0; i < roots.length; i++) {
+      if (roots[i].__pricingEngine) continue;
+      roots[i].__pricingEngine = new PricingEngine(roots[i]);
+    }
   }
 
   if (document.readyState === 'loading') {
