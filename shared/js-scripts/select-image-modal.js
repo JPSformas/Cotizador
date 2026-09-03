@@ -1,10 +1,6 @@
 // JS basic demo
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Original functionality
-    document.getElementById('agregarCantidadDesktop').addEventListener('click', () => alert('Agregar nueva fila'));
-    document.getElementById('saveItemCotization').addEventListener('click', () => alert('Guardado'));
-    
     // Image storage and management
     let lastDeletedImage = null;
     let uploadedImages = [];
