@@ -141,8 +141,12 @@ for (const path of ITEM_PAGES) {
   });
 }
 
+// Se usa la página genérico-costo: es la única donde el campo externo
+// [data-pricing-pvp] alimenta el cálculo. En editItem.html el campo está
+// disabled, y en genérico-pvp cada fila trae su propio precioVolumen, que
+// pisa al PVP externo: allí la fila no se movería aunque el cableado ande.
 await check('editing the PVP field moves the totals', async () => {
-  const page = await open('v6/editItem-generico-pvp.html');
+  const page = await open('v6/editItem-generico-costo.html');
   const before = await page.$eval('[data-role="pricing-body"] tr', (r) => r.textContent);
   await page.fill('[data-pricing-pvp]', '9999');
   await page.waitForTimeout(200);
