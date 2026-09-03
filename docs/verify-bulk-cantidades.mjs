@@ -407,7 +407,7 @@ await check('reopening resets the ladder', async () => {
   await page.waitForSelector('#modalMasElementos.show');
   await page.click('#modalMasElementos [data-action="add-row"]');
   await page.click('#modalMasElementos [data-bs-dismiss="modal"].btn-secondary');
-  await page.waitForTimeout(500);
+  await page.waitForSelector('#modalMasElementos', { state: 'hidden' });
   await page.click('#btnCotizarRapido');
   await page.waitForSelector('#modalMasElementos.show');
   const rows = await page.$$eval('#modalMasElementos [data-role="pricing-body"] tr', (r) => r.length);
@@ -422,14 +422,12 @@ await check('saving applies the payload and flashes the targets', async () => {
   await page.fill('#modalMasElementos .cantidad[data-i="0"]', '250');
   await page.fill('#modalMasElementos .lp-input[data-i="0"]', '500');
   await page.click('#bulkGuardarDesktop');
-  await page.waitForTimeout(300);
+  await page.waitForSelector('#modalMasElementos', { state: 'hidden' });
   const payload = await page.evaluate(() => window.bulkCantidades.getLastPayload());
   assert(payload.rows[0].cantidad === 250, 'expected cantidad 250, got ' + payload.rows[0].cantidad);
   assert(payload.rows[0].logoUnit === 500, 'expected logoUnit 500, got ' + payload.rows[0].logoUnit);
   assert(payload.rows[1].logoUnit === null, 'row 1 logo should stay null');
   assert(payload.targets.length === 2, 'expected 2 targets, got ' + payload.targets.length);
-  const open2 = await page.$eval('#modalMasElementos', (m) => m.classList.contains('show'));
-  assert(!open2, 'modal should close after saving');
   await page.close();
 });
 
@@ -529,12 +527,10 @@ await check('mobile save applies and closes', async () => {
   await page.click('#btnCotizarRapidoMobile');
   await page.waitForSelector('#sidebarMasElementos.show');
   await page.click('#bulkGuardarMobile');
-  await page.waitForTimeout(500);
+  await page.waitForSelector('#sidebarMasElementos', { state: 'hidden' });
   const payload = await page.evaluate(() => window.bulkCantidades.getLastPayload());
   assert(payload && payload.rows.length === 3, 'expected a 3-row payload');
   assert(payload.targets.length === 4, 'Cotizar rápido should target all 4 items');
-  const shown = await page.$eval('#sidebarMasElementos', (o) => o.classList.contains('show'));
-  assert(!shown, 'offcanvas should close after saving');
   await page.close();
 });
 
