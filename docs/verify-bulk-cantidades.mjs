@@ -534,6 +534,43 @@ await check('mobile save applies and closes', async () => {
   await page.close();
 });
 
+// --- Task 8: v5 must be untouched ------------------------------------------
+
+await check('v5 keeps its own cantidades modal', async () => {
+  const page = await open('v5/detalle-cotizacion.html');
+  assert(page.errors.length === 0, 'page errors: ' + page.errors.join(' | '));
+  const managed = await page.$$eval('[data-bulk-managed]', (e) => e.length);
+  assert(managed === 0, 'v5 must not be bulk-managed');
+  await page.click('#btnCotizarRapido');
+  await page.waitForSelector('#modalMasElementos.show');
+  const text = await page.$eval('#modalMasElementos', (m) => m.textContent);
+  assert(text.indexOf('Costo extra') !== -1, 'v5 should still show its Costo extra column');
+  const banner = await page.$eval('#modalMasElementosContext', (e) => e.classList.contains('context-global'));
+  assert(banner, 'v5 banner should still switch to the global variant');
+  await page.close();
+});
+
+await check('v5 mobile nested sidebar still opens', async () => {
+  const page = await open('v5/detalle-cotizacion.html', { width: 390, height: 844 });
+  await page.click('#btnCotizarRapidoMobile');
+  await page.waitForSelector('#sidebarMasElementos.show');
+  await page.click('#btnAgregarCantidades');
+  await page.waitForTimeout(200);
+  const shown = await page.$eval('#nestedSidebar', (n) => n.classList.contains('show'));
+  assert(shown, 'v5 nested sidebar should still open via the shared script');
+  await page.close();
+});
+
+await check('v5 item pages keep working', async () => {
+  for (const path of ['v5/editItem.html', 'v5/editItem-generico.html']) {
+    const page = await open(path);
+    assert(page.errors.length === 0, path + ' errors: ' + page.errors.join(' | '));
+    const rows = await page.$$eval('table tbody tr', (r) => r.length);
+    assert(rows >= 2, path + ' should still render its static quantity rows');
+    await page.close();
+  }
+});
+
 // --- report ----------------------------------------------------------------
 
 await browser.close();
