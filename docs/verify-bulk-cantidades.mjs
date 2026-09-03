@@ -117,6 +117,105 @@ for (const path of ['v5/editItem.html', 'v5/editItem-generico.html', 'v5/detalle
   });
 }
 
+// --- Task 2: bulk table mode -----------------------------------------------
+
+const BULK_FIXTURE = 'docs/fixtures/bulk-table.html';
+
+await check('bulk table renders the v6 column set', async () => {
+  const page = await open(BULK_FIXTURE);
+  assert(page.errors.length === 0, 'page errors: ' + page.errors.join(' | '));
+  const heads = await page.$$eval('[data-role="pricing-head"] th', (th) =>
+    th.map((e) => e.textContent.trim())
+  );
+  for (const label of ['Cantidad', 'Logo x Ubicación', 'Markup', 'Ajustes comerciales']) {
+    assert(heads.some((h) => h.startsWith(label)), 'missing header ' + label + ' in ' + JSON.stringify(heads));
+  }
+  assert(!heads.some((h) => h.includes('Costo extra')), 'Costo extra must not exist in v6');
+  assert(!heads.some((h) => h.includes('Subtotal')), 'bulk mode must not show results');
+  const rows = await page.$$eval('[data-role="pricing-body"] tr', (r) => r.length);
+  assert(rows === 3, 'expected 3 rows, got ' + rows);
+  await page.close();
+});
+
+await check('bulk table caps rows at 5 and never empties', async () => {
+  const page = await open(BULK_FIXTURE);
+  for (let i = 0; i < 4; i++) await page.click('[data-action="add-row"]').catch(() => {});
+  let rows = await page.$$eval('[data-role="pricing-body"] tr', (r) => r.length);
+  assert(rows === 5, 'expected cap of 5 rows, got ' + rows);
+  const disabled = await page.$eval('[data-action="add-row"]', (b) => b.disabled);
+  assert(disabled, 'add button should be disabled at 5 rows');
+  for (let i = 0; i < 6; i++) {
+    const btn = await page.$('[data-action="remove-row"]:not([disabled])');
+    if (btn) await btn.click();
+  }
+  rows = await page.$$eval('[data-role="pricing-body"] tr', (r) => r.length);
+  assert(rows === 1, 'expected 1 remaining row, got ' + rows);
+  await page.close();
+});
+
+await check('bulk table cascades discount columns', async () => {
+  const page = await open(BULK_FIXTURE);
+  await page.click('.pct-add[data-field="descs"]');
+  const descInputs = await page.$$eval('.desc-input[data-i="0"]', (i) => i.length);
+  assert(descInputs === 2, 'expected 2 desc inputs after +, got ' + descInputs);
+  await page.fill('.desc-input[data-i="0"][data-j="0"]', '10');
+  await page.fill('.desc-input[data-i="0"][data-j="1"]', '5');
+  await page.waitForTimeout(150);
+  const eff = await page.$eval('tr[data-i="0"] .desc-eff', (e) => e.textContent);
+  assert(eff.indexOf('14,5%') !== -1, 'expected cascade efect. 14,5%, got ' + eff);
+  await page.close();
+});
+
+await check('getBulkPayload reports empty logo and markup as null', async () => {
+  const page = await open(BULK_FIXTURE);
+  await page.fill('.lp-input[data-i="0"]', '500');
+  await page.fill('.markup-input[data-i="1"]', '1,35');
+  await page.waitForTimeout(150);
+  const payload = await page.evaluate(() =>
+    document.querySelector('[data-pricing-engine]').__pricingEngine.getBulkPayload()
+  );
+  assert(payload.length === 3, 'expected 3 entries, got ' + payload.length);
+  assert(payload[0].logoUnit === 500, 'row 0 logoUnit should be 500, got ' + payload[0].logoUnit);
+  assert(payload[0].customMarkup === null, 'row 0 markup should be null');
+  assert(payload[1].customMarkup === 1.35, 'row 1 markup should be 1.35, got ' + payload[1].customMarkup);
+  assert(payload[1].logoUnit === null, 'row 1 logoUnit should be null');
+  await page.close();
+});
+
+await check('setBulkColumns hides logo and markup', async () => {
+  const page = await open(BULK_FIXTURE);
+  await page.evaluate(() =>
+    document.querySelector('[data-pricing-engine]').__pricingEngine.setBulkColumns({ logo: false, markup: false })
+  );
+  const heads = await page.$$eval('[data-role="pricing-head"] th', (th) => th.map((e) => e.textContent.trim()));
+  assert(!heads.some((h) => h.startsWith('Logo')), 'logo column should be hidden');
+  assert(!heads.some((h) => h.startsWith('Markup')), 'markup column should be hidden');
+  assert(heads.some((h) => h.startsWith('Cantidad')), 'cantidad must survive');
+  await page.close();
+});
+
+await check('bulk engines wire no fields outside their root', async () => {
+  const page = await open(BULK_FIXTURE);
+  const wiring = await page.evaluate(() => {
+    const e = document.querySelector('[data-pricing-engine]').__pricingEngine;
+    return { pvp: e.pvpInput, setup: e.setupInput };
+  });
+  assert(wiring.pvp === null, 'a bulk engine must not claim [data-pricing-pvp]');
+  assert(wiring.setup === null, 'a bulk engine must not claim [data-pricing-setup]');
+  await page.close();
+});
+
+await check('resetBulkQuotes restores the default ladder', async () => {
+  const page = await open(BULK_FIXTURE);
+  await page.click('[data-action="add-row"]');
+  await page.evaluate(() =>
+    document.querySelector('[data-pricing-engine]').__pricingEngine.resetBulkQuotes()
+  );
+  const rows = await page.$$eval('[data-role="pricing-body"] tr', (r) => r.length);
+  assert(rows === 3, 'expected the 3-row default back, got ' + rows);
+  await page.close();
+});
+
 // --- report ----------------------------------------------------------------
 
 await browser.close();

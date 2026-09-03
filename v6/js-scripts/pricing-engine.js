@@ -119,7 +119,11 @@
     this.root = root;
     this.pricingMode = (root.getAttribute('data-pricing-mode') || 'costo').toLowerCase();
     this.isPvpMode = this.pricingMode === 'pvp';
-    this.hasLogo = !this.isPvpMode && root.getAttribute('data-has-logo') !== 'false';
+    this.isBulkMode = this.pricingMode === 'bulk';
+    this.bulkView = root.getAttribute('data-pricing-view') || 'table';
+    this.showLogoCol = root.getAttribute('data-bulk-logo') !== 'false';
+    this.showMarkupCol = root.getAttribute('data-bulk-markup') !== 'false';
+    this.hasLogo = !this.isPvpMode && !this.isBulkMode && root.getAttribute('data-has-logo') !== 'false';
     this.divisor = parseFloat(root.getAttribute('data-cost-divisor')) || 1.65;
     // 'prorated' -> setup divided across the row quantity (SETUP Prorrateado)
     // 'flat'     -> setup added per unit as-is
@@ -173,15 +177,16 @@
       head: r.querySelector('[data-role="pricing-head"]'),
       body: r.querySelector('[data-role="pricing-body"]'),
       grid: r.querySelector('[data-role="logo-grid"]'),
-      addBtn: r.querySelector('[data-role="add-row"]'),
+      addBtn: r.querySelector('[data-action="add-row"]'),
       colores: r.querySelector('[data-role="colores"]'),
       metodo: r.querySelector('[data-role="metodo"]'),
       metodoDesc: r.querySelector('[data-role="metodo-desc"]'),
       ubicVal: r.querySelector('[data-role="ubic-val"]'),
       costoHint: r.querySelector('[data-role="costo-producto-hint"]')
     };
-    this.pvpInput = document.querySelector('[data-pricing-pvp]');
-    this.setupInput = document.querySelector('[data-pricing-setup]');
+    var isBulk = r.getAttribute('data-pricing-mode') === 'bulk';
+    this.pvpInput = isBulk ? null : document.querySelector('[data-pricing-pvp]');
+    this.setupInput = isBulk ? null : document.querySelector('[data-pricing-setup]');
   };
 
   PricingEngine.prototype.getPvp = function () {
@@ -214,7 +219,7 @@
       } else if (t.matches('.prod-input')) {
         self.commitProd(+t.getAttribute('data-i'));
       } else if (t.matches('.markup-input')) {
-        self.commitMk(+t.getAttribute('data-i'));
+        if (!self.isBulkMode) self.commitMk(+t.getAttribute('data-i'));
       }
     });
 
@@ -272,21 +277,26 @@
     if (this.setupInput) {
       this.setupInput.addEventListener('input', function () { self.updateAll(); });
     }
-    // Recompute after the PVP refresh mock rewrites the field programmatically.
-    var refreshBtn = document.querySelector('[data-pricing-refresh]');
-    if (refreshBtn) {
-      refreshBtn.addEventListener('click', function () {
-        setTimeout(function () { self.updateAll(); }, 0);
-      });
-    }
-    var saveBtn = document.querySelector('[data-pricing-save]');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', function () { self.save(saveBtn); });
+    if (!this.isBulkMode) {
+      var refreshBtn = document.querySelector('[data-pricing-refresh]');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', function () {
+          setTimeout(function () { self.updateAll(); }, 0);
+        });
+      }
+      var saveBtn = document.querySelector('[data-pricing-save]');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', function () { self.save(saveBtn); });
+      }
     }
   };
 
   // Read what the user typed in the DOM back into the state array.
   PricingEngine.prototype.syncFromDom = function () {
+    if (this.isBulkMode) {
+      this.syncBulkFromDom();
+      return;
+    }
     var self = this;
     this.quotes.forEach(function (q, i) {
       var c = self.root.querySelector('.cantidad[data-i="' + i + '"]');
@@ -384,6 +394,10 @@
   };
 
   PricingEngine.prototype.buildRows = function () {
+    if (this.isBulkMode) {
+      this.buildBulkRows();
+      return;
+    }
     if (this.isPvpMode) {
       this.buildPvpRows();
       return;
@@ -507,6 +521,136 @@
 
     if (this.el.addBtn) this.el.addBtn.disabled = this.quotes.length >= MAX_FILAS;
     this.updateAll();
+  };
+
+  PricingEngine.prototype.buildBulkRows = function () {
+    if (this.el.head) {
+      this.el.head.innerHTML = '<tr>'
+        + '<th rowspan="2">Cantidad</th>'
+        + (this.showLogoCol ? '<th class="grp-costos" rowspan="2">Logo x Ubicación</th>' : '')
+        + (this.showMarkupCol ? '<th rowspan="2">Markup</th>' : '')
+        + '<th class="grp-ajustes" colspan="' + (this.nDesc + this.nFin) + '">Ajustes comerciales</th>'
+        + '<th rowspan="2"></th>'
+        + '</tr><tr>'
+        + this.headPctThs('descs', 'Desc. adicional', 'Desc.', this.nDesc)
+        + this.headPctThs('fins', 'Financiación', 'Fin.', this.nFin)
+        + '</tr>';
+    }
+
+    this.el.body.innerHTML = this.quotes.map(function (q, i) {
+      var logoTd = this.showLogoCol
+        ? '<td class="grp-costos">'
+          + '<div class="lp-bulk-wrap"><span>$</span>'
+          + '<input class="lp-input" type="text" inputmode="numeric" data-i="' + i + '" value="'
+          + (q.logoUnit != null ? inputVal(q.logoUnit) : '') + '"></div>'
+          + '<div class="lp-bulk-hint" data-i="' + i + '"></div>'
+          + '</td>'
+        : '';
+      var markupTd = this.showMarkupCol
+        ? '<td>'
+          + '<input class="markup-input markup-bulk" type="text" data-i="' + i + '" value="'
+          + (q.customMarkup != null ? fmtMarkup(q.customMarkup) : '') + '">'
+          + '<div class="markup-hint">sin cambios</div>'
+          + '</td>'
+        : '';
+      return '<tr data-i="' + i + '">'
+        + '<td><input class="cantidad" type="text" data-i="' + i + '" value="' + q.cantidad + '"></td>'
+        + logoTd
+        + markupTd
+        + this.pctTds(i, 'descs', 'desc-input', 'desc-eff')
+        + this.pctTds(i, 'fins', 'fin-input', 'fin-eff')
+        + '<td class="trash"><button type="button" class="trash-btn" data-action="remove-row" data-i="' + i
+        + '" title="Eliminar cantidad" aria-label="Eliminar cantidad"'
+        + (this.quotes.length <= 1 ? ' disabled' : '') + '>' + ICONS.trash + '</button></td>'
+        + '</tr>';
+    }, this).join('');
+
+    if (this.el.addBtn) this.el.addBtn.disabled = this.quotes.length >= MAX_FILAS;
+    this.updateAll();
+  };
+
+  PricingEngine.prototype.updateBulkRows = function () {
+    var self = this;
+    var base = (this.quotes[0] && this.quotes[0].logoUnit != null) ? this.quotes[0].logoUnit : null;
+
+    this.quotes.forEach(function (q, i) {
+      var tr = self.el.body.querySelector('tr[data-i="' + i + '"]');
+      if (!tr) return;
+
+      var descFactor = 1, finFactor = 1;
+      q.descs.forEach(function (d) { descFactor *= (1 - d / 100); });
+      q.fins.forEach(function (f) { finFactor *= (1 + f / 100); });
+
+      var dEff = tr.querySelector('.desc-eff');
+      if (dEff) {
+        dEff.textContent = 'efect. ' + fmtPct(1 - descFactor);
+        dEff.title = q.descs.map(function (d) { return d + '%'; }).join(' + ') + ' en cascada';
+      }
+      var fEff = tr.querySelector('.fin-eff');
+      if (fEff) {
+        fEff.textContent = 'efect. ' + fmtPct(finFactor - 1);
+        fEff.title = q.fins.map(function (f) { return f + '%'; }).join(' + ') + ' en cascada';
+      }
+
+      var inp = tr.querySelector('.lp-input');
+      var hint = tr.querySelector('.lp-bulk-hint');
+      if (inp) inp.placeholder = (i > 0 && base != null) ? inputVal(base) : '';
+      if (hint) {
+        if (i === 0) hint.textContent = 'base';
+        else hint.textContent = (q.logoUnit == null && base != null) ? 'heredado' : '';
+      }
+    });
+  };
+
+  PricingEngine.prototype.syncBulkFromDom = function () {
+    var self = this;
+    this.quotes.forEach(function (q, i) {
+      var c = self.root.querySelector('.cantidad[data-i="' + i + '"]');
+      if (c) q.cantidad = Math.max(0, parseNum(c.value));
+      q.descs = self.readPcts(i, 'desc-input', q.descs);
+      q.fins = self.readPcts(i, 'fin-input', q.fins);
+      var l = self.root.querySelector('.lp-input[data-i="' + i + '"]');
+      if (l) {
+        var raw = l.value.trim();
+        q.logoUnit = (raw === '') ? null : parseMoney(raw);
+      }
+      var m = self.root.querySelector('.markup-input[data-i="' + i + '"]');
+      if (m) {
+        var mraw = m.value.trim();
+        q.customMarkup = (mraw === '') ? null : parseNum(mraw);
+      }
+    });
+  };
+
+  PricingEngine.prototype.getBulkPayload = function () {
+    this.syncFromDom();
+    return this.quotes.map(function (q) {
+      return {
+        cantidad: q.cantidad,
+        logoUnit: (q.logoUnit != null) ? q.logoUnit : null,
+        customMarkup: (q.customMarkup != null) ? q.customMarkup : null,
+        descs: q.descs.slice(),
+        fins: q.fins.slice()
+      };
+    });
+  };
+
+  PricingEngine.prototype.setBulkColumns = function (opts) {
+    this.syncFromDom();
+    this.showLogoCol = (opts && opts.logo) !== false;
+    this.showMarkupCol = (opts && opts.markup) !== false;
+    this.buildRows();
+  };
+
+  PricingEngine.prototype.resetBulkQuotes = function () {
+    this.quotes = this.loadInitialQuotes();
+    this.nDesc = Math.min(MAX_PCT, Math.max(1, this.quotes[0].descs.length));
+    this.nFin = Math.min(MAX_PCT, Math.max(1, this.quotes[0].fins.length));
+    this.quotes.forEach(function (q) {
+      while (q.descs.length < this.nDesc) q.descs.push(0);
+      while (q.fins.length < this.nFin) q.fins.push(0);
+    }, this);
+    this.buildRows();
   };
 
   PricingEngine.prototype.addRow = function () {
@@ -643,6 +787,10 @@
   };
 
   PricingEngine.prototype.updateAll = function () {
+    if (this.isBulkMode) {
+      this.updateBulkRows();
+      return;
+    }
     if (this.isPvpMode) {
       this.updatePvpRows();
       return;
