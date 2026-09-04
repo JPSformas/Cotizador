@@ -4,11 +4,13 @@
 
 **Goal:** Replace the outdated v5-shaped quantity form in `#modalMasElementos` / `#sidebarMasElementos` on `v6/detalle-cotizacion.html` with a bulk editor rendered by the v6 pricing engine.
 
-**Architecture:** `v6/js-scripts/pricing-engine.js` gains a third mode, `data-pricing-mode="bulk"`, that renders inputs only (`Cantidad | Logo x Ubicación | Markup | Ajustes comerciales | 🗑`) in either a table view or a card view, reusing the existing cascading-column machinery. A new `v6/js-scripts/bulk-cantidades.js` owns everything surface-specific: which items are targeted, which columns apply to them, the context banner, the mobile nested panel, and applying the payload. Two shared scripts get a `data-bulk-managed` guard so v5 keeps its current behaviour.
+**Architecture:** `v6/js-scripts/pricing-engine.js` gains a third mode, `data-pricing-mode="bulk"`, that renders inputs only (`Cantidad | Logo x Ubicación | Ajustes comerciales | 🗑`) in either a table view or a card view, reusing the existing cascading-column machinery. A new `v6/js-scripts/bulk-cantidades.js` owns everything surface-specific: which items are targeted, whether Logo applies to them, the context banner, the mobile nested panel, and applying the payload. Two shared scripts get a `data-bulk-managed` guard so v5 keeps its current behaviour.
 
 **Tech Stack:** Vanilla ES5-style JS (the engine is written without arrow functions or `const` — match it), Bootstrap 5.3.3, Font Awesome 7.0.1, Playwright 1.60 for verification.
 
 **Spec:** `docs/superpowers/specs/2026-09-03-bulk-cantidades-v6-design.md`
+
+**Later change (current truth):** Markup was removed from the bulk form after the tasks below shipped. Empty Logo is `0` and always overwrites. The footer is the v5 wipe line. Task code blocks below still show the earlier Markup / “leave empty alone” design — do not re-implement them. Follow the spec.
 
 ## Global Constraints
 
@@ -18,7 +20,7 @@
 - Match `pricing-engine.js` style in all **browser** scripts (`v6/js-scripts/`, `shared/js-scripts/`): IIFE, `var`, `function`, string concatenation for markup, no arrow functions, no template literals. This does not bind `docs/verify-bulk-cantidades.mjs`, which is Node-only and uses modern syntax throughout.
 - Row cap is `MAX_FILAS = 5`; cascade cap is `MAX_PCT = 3`. Never fork these numbers.
 - The ladder can never be empty: the trash button is disabled at one row.
-- UI copy is Spanish. Exact strings: `Cargar cantidades`, `Logo x Ubicación`, `Markup`, `Ajustes comerciales`, `Desc. adicional`, `Financiación`, `Cantidad`, `sin cambios`, `base`, `heredado`, `+ Agregar cantidad (máx. 5)`, `+ Agregar descuento en cascada`, `+ Agregar financiación en cascada`, `Se agrega para todas las cantidades`, `Editar cantidad`, `Agregar cantidades`.
+- UI copy is Spanish. Exact strings: `Cargar cantidades`, `Logo x Ubicación`, `Ajustes comerciales`, `Desc. adicional`, `Financiación`, `Cantidad`, `+ Agregar cantidad (máx. 5)`, `+ Agregar descuento en cascada`, `+ Agregar financiación en cascada`, `Se agrega para todas las cantidades`, `Editar cantidad`, `Agregar cantidades`, `Al guardar, se actualizarán y reemplazarán las configuraciones previas.`, `Logo no aplica a N ítem(s) sin costos.`
 - Money parsing is es-AR: `parseMoney` strips dot thousands and treats comma as decimal. Never use `parseFloat` directly on a user-facing money string.
 - Playwright browsers must be present: `npx playwright install chromium` (one-time).
 
@@ -2041,10 +2043,10 @@ git commit -m "test(v6): v5 non-regression checks + document the verify command"
 
 Serve the repo root and walk through the spec's verification list by hand — automated checks do not cover visual weight:
 
-1. `v6/detalle-cotizacion.html` → Cotizar rápido: yellow banner, full column set, the table reads like the item page.
+1. `v6/detalle-cotizacion.html` → Cotizar rápido: yellow banner, Cantidad / Logo / Ajustes — no Markup.
 2. Select two catálogo items → Cargar cantidades: blue banner with the count.
-3. Select one catálogo item and item 4 (genérico-PVP): both columns stay, banner adds the "no aplican" note.
-4. Select only item 4: Logo and Markup columns are gone.
+3. Select one catálogo item and item 4 (genérico-PVP): Logo stays, banner adds “Logo no aplica a 1 ítem sin costos.”
+4. Select only item 4: Logo column is gone.
 5. `+` adds a Desc. column for every row up to three, `×` removes it, `efect.` tracks.
 6. Agregar cantidad stops at five rows; the trash is disabled at one.
 7. At ≤768px: cards match the desktop columns, the nested panel adds and edits, the footer hides while nested is open.

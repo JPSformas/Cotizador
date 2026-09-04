@@ -5,9 +5,9 @@
  * motor de precios a lo que esos ítems soportan, escribe el contexto y aplica
  * el resultado. El motor no sabe nada de modales: sólo expone getBulkPayload().
  *
- * Los ítems genéricos con precio de venta (generico-pvp) no tienen logo ni
- * markup, así que esas dos columnas se ocultan cuando todos los destinos son
- * de ese tipo y se avisa cuando la selección es mixta.
+ * Los ítems genéricos con precio de venta (generico-pvp) no tienen logo,
+ * así que esa columna se oculta cuando todos los destinos son de ese tipo
+ * y se avisa cuando la selección es mixta.
  */
 (function () {
   'use strict';
@@ -32,7 +32,7 @@
     });
   }
 
-  // Un ítem "sin costos" es el genérico cargado por PVP: no tiene logo ni markup.
+  // Un ítem "sin costos" es el genérico cargado por PVP: no tiene logo.
   function isPvpItem(row) {
     return row.classList.contains('generico-pvp');
   }
@@ -72,7 +72,7 @@
         note.className = 'selection-context-note ms-2';
         box.querySelector('.selection-context-text').appendChild(note);
       }
-      note.textContent = ' Logo y Markup no aplican a ' + skipped
+      note.textContent = ' Logo no aplica a ' + skipped
         + (skipped === 1 ? ' ítem sin costos.' : ' ítems sin costos.');
     } else if (note) {
       note.remove();
@@ -83,7 +83,7 @@
     if (!engine) return;
     var withCosts = state.targets.filter(function (row) { return !isPvpItem(row); }).length;
     var show = state.targets.length === 0 || withCosts > 0;
-    engine.setBulkColumns({ logo: show, markup: show });
+    engine.setBulkColumns({ logo: show });
   }
 
   function prepare(container, contextId, trigger) {
@@ -146,7 +146,6 @@
             nested.engine.setBulkQuote(nested.index, {
               cantidad: Number(document.getElementById('nestedCantidad').value) || 0,
               logoUnit: parseField(document.getElementById('nestedLogo').value),
-              customMarkup: parseField(document.getElementById('nestedMarkup').value),
               descs: readPct('nestedDescGroup'),
               fins: readPct('nestedFinGroup')
             });
@@ -173,9 +172,9 @@
 
   function parseField(value) {
     var raw = String(value || '').trim();
-    if (raw === '') return null;
+    if (raw === '') return 0;
     var n = parseFloat(raw.replace(/\./g, '').replace(',', '.'));
-    return isNaN(n) ? null : n;
+    return isNaN(n) ? 0 : n;
   }
 
   function openNested(engine, index) {
@@ -190,13 +189,11 @@
     document.getElementById('nestedSidebarTitle').textContent = (index == null) ? 'Agregar cantidades' : 'Editar cantidad';
     document.getElementById('btnAgregarCantidadNested').textContent = (index == null) ? 'Agregar' : 'Guardar';
     document.getElementById('nestedCantidad').value = q ? q.cantidad : '';
-    document.getElementById('nestedLogo').value = (q && q.logoUnit != null) ? q.logoUnit : '';
-    document.getElementById('nestedMarkup').value = (q && q.customMarkup != null) ? q.customMarkup : '';
+    document.getElementById('nestedLogo').value = (q && q.logoUnit) ? q.logoUnit : '';
     renderPctRows('nestedDescGroup', q ? q.descs : [0]);
     renderPctRows('nestedFinGroup', q ? q.fins : [0]);
 
     document.getElementById('nestedLogoField').hidden = !engine.showLogoCol;
-    document.getElementById('nestedMarkupField').hidden = !engine.showMarkupCol;
 
     document.getElementById('nestedSidebar').classList.add('show');
     var footer = document.querySelector('#sidebarMasElementos .offcanvas-footer');
@@ -214,7 +211,6 @@
     var data = {
       cantidad: Number(document.getElementById('nestedCantidad').value) || 0,
       logoUnit: parseField(document.getElementById('nestedLogo').value),
-      customMarkup: parseField(document.getElementById('nestedMarkup').value),
       descs: readPct('nestedDescGroup'),
       fins: readPct('nestedFinGroup')
     };

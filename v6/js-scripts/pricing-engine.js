@@ -122,7 +122,7 @@
     this.isBulkMode = this.pricingMode === 'bulk';
     this.bulkView = root.getAttribute('data-pricing-view') || 'table';
     this.showLogoCol = root.getAttribute('data-bulk-logo') !== 'false';
-    this.showMarkupCol = root.getAttribute('data-bulk-markup') !== 'false';
+    this.showMarkupCol = false;
     this.hasLogo = !this.isPvpMode && !this.isBulkMode && root.getAttribute('data-has-logo') !== 'false';
     this.divisor = parseFloat(root.getAttribute('data-cost-divisor')) || 1.65;
     // 'prorated' -> setup divided across the row quantity (SETUP Prorrateado)
@@ -539,7 +539,6 @@
       this.el.head.innerHTML = '<tr>'
         + '<th rowspan="2">Cantidad</th>'
         + (this.showLogoCol ? '<th class="grp-costos" rowspan="2">Logo x Ubicación</th>' : '')
-        + (this.showMarkupCol ? '<th rowspan="2">Markup</th>' : '')
         + '<th class="grp-ajustes" colspan="' + (this.nDesc + this.nFin) + '">Ajustes comerciales</th>'
         + '<th rowspan="2"></th>'
         + '</tr><tr>'
@@ -553,21 +552,12 @@
         ? '<td class="grp-costos">'
           + '<div class="lp-bulk-wrap"><span>$</span>'
           + '<input class="lp-input" type="text" inputmode="numeric" data-i="' + i + '" value="'
-          + (q.logoUnit != null ? inputVal(q.logoUnit) : '') + '"></div>'
-          + '<div class="lp-bulk-hint" data-i="' + i + '"></div>'
-          + '</td>'
-        : '';
-      var markupTd = this.showMarkupCol
-        ? '<td>'
-          + '<input class="markup-input markup-bulk" type="text" data-i="' + i + '" value="'
-          + (q.customMarkup != null ? fmtMarkup(q.customMarkup) : '') + '">'
-          + '<div class="markup-hint">sin cambios</div>'
+          + (q.logoUnit ? inputVal(q.logoUnit) : '') + '"></div>'
           + '</td>'
         : '';
       return '<tr data-i="' + i + '">'
         + '<td><input class="cantidad" type="text" data-i="' + i + '" value="' + q.cantidad + '"></td>'
         + logoTd
-        + markupTd
         + this.pctTds(i, 'descs', 'desc-input', 'desc-eff')
         + this.pctTds(i, 'fins', 'fin-input', 'fin-eff')
         + '<td class="trash"><button type="button" class="trash-btn" data-action="remove-row" data-i="' + i
@@ -586,7 +576,6 @@
       return;
     }
     var self = this;
-    var base = (this.quotes[0] && this.quotes[0].logoUnit != null) ? this.quotes[0].logoUnit : null;
 
     this.quotes.forEach(function (q, i) {
       var tr = self.el.body.querySelector('tr[data-i="' + i + '"]');
@@ -605,14 +594,6 @@
       if (fEff) {
         fEff.textContent = 'efect. ' + fmtPct(finFactor - 1);
         fEff.title = q.fins.map(function (f) { return f + '%'; }).join(' + ') + ' en cascada';
-      }
-
-      var inp = tr.querySelector('.lp-input');
-      var hint = tr.querySelector('.lp-bulk-hint');
-      if (inp) inp.placeholder = (i > 0 && base != null) ? inputVal(base) : '';
-      if (hint) {
-        if (i === 0) hint.textContent = 'base';
-        else hint.textContent = (q.logoUnit == null && base != null) ? 'heredado' : '';
       }
     });
   };
@@ -634,13 +615,9 @@
       var logoLine = this.showLogoCol
         ? '<div class="fieldLabel">Logo x Ubicación: <span class="fieldValue" data-role="card-logo"></span></div>'
         : '';
-      var markupLine = this.showMarkupCol
-        ? '<div class="fieldLabel">Markup: <span class="fieldValue" data-role="card-markup"></span></div>'
-        : '';
       return '<div class="quantities-card" data-i="' + i + '">'
         + '<div class="fieldLabel">Cantidad: <span class="fieldValue" data-role="card-cantidad"></span></div>'
         + logoLine
-        + markupLine
         + '<div class="fieldLabel">Desc.: <span class="fieldValue" data-role="card-desc"></span></div>'
         + '<div class="fieldLabel">Fin.: <span class="fieldValue" data-role="card-fin"></span></div>'
         + '<div class="action-buttons">'
@@ -660,7 +637,6 @@
   PricingEngine.prototype.updateBulkCards = function () {
     if (!this.el.cards) return;
     var self = this;
-    var base = (this.quotes[0] && this.quotes[0].logoUnit != null) ? this.quotes[0].logoUnit : null;
 
     this.quotes.forEach(function (q, i) {
       var card = self.el.cards.querySelector('.quantities-card[data-i="' + i + '"]');
@@ -671,11 +647,7 @@
       };
       set('card-cantidad', fmtQty(q.cantidad));
       if (self.showLogoCol) {
-        var logoEff = (q.logoUnit != null) ? q.logoUnit : base;
-        set('card-logo', logoEff == null ? 'sin cambios' : (money(logoEff) + (q.logoUnit == null ? ' (heredado)' : '')));
-      }
-      if (self.showMarkupCol) {
-        set('card-markup', q.customMarkup == null ? 'sin cambios' : fmtMarkup(q.customMarkup));
+        set('card-logo', money(q.logoUnit || 0));
       }
       set('card-desc', self.cascadeText(q.descs, 'desc'));
       set('card-fin', self.cascadeText(q.fins, 'fin'));
@@ -704,8 +676,7 @@
     if (!q) return;
     this.growCascades(data);
     if (data.cantidad != null) q.cantidad = Math.max(0, data.cantidad);
-    q.logoUnit = (data.logoUnit == null || data.logoUnit === '') ? null : data.logoUnit;
-    q.customMarkup = (data.customMarkup == null || data.customMarkup === '') ? null : data.customMarkup;
+    q.logoUnit = (data.logoUnit == null || data.logoUnit === '') ? 0 : data.logoUnit;
     if (data.descs) q.descs = data.descs.slice(0, this.nDesc);
     if (data.fins) q.fins = data.fins.slice(0, this.nFin);
     while (q.descs.length < this.nDesc) q.descs.push(0);
@@ -718,8 +689,7 @@
     this.growCascades(data || {});
     this.quotes.push({
       cantidad: (data && data.cantidad) || 0,
-      logoUnit: (data && data.logoUnit != null && data.logoUnit !== '') ? data.logoUnit : null,
-      customMarkup: (data && data.customMarkup != null && data.customMarkup !== '') ? data.customMarkup : null,
+      logoUnit: (data && data.logoUnit != null && data.logoUnit !== '') ? data.logoUnit : 0,
       descs: (data && data.descs) ? data.descs.slice(0, this.nDesc) : zeros(this.nDesc),
       fins: (data && data.fins) ? data.fins.slice(0, this.nFin) : zeros(this.nFin),
       prodCost: null,
@@ -741,12 +711,7 @@
       var l = self.root.querySelector('.lp-input[data-i="' + i + '"]');
       if (l) {
         var raw = l.value.trim();
-        q.logoUnit = (raw === '') ? null : parseMoney(raw);
-      }
-      var m = self.root.querySelector('.markup-input[data-i="' + i + '"]');
-      if (m) {
-        var mraw = m.value.trim();
-        q.customMarkup = (mraw === '') ? null : parseNum(mraw);
+        q.logoUnit = (raw === '') ? 0 : parseMoney(raw);
       }
     });
   };
@@ -756,8 +721,7 @@
     return this.quotes.map(function (q) {
       return {
         cantidad: q.cantidad,
-        logoUnit: (q.logoUnit != null) ? q.logoUnit : null,
-        customMarkup: (q.customMarkup != null) ? q.customMarkup : null,
+        logoUnit: q.logoUnit || 0,
         descs: q.descs.slice(),
         fins: q.fins.slice()
       };
@@ -767,7 +731,6 @@
   PricingEngine.prototype.setBulkColumns = function (opts) {
     this.syncFromDom();
     this.showLogoCol = (opts && opts.logo) !== false;
-    this.showMarkupCol = (opts && opts.markup) !== false;
     this.buildRows();
   };
 

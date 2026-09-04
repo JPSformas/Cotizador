@@ -61,32 +61,24 @@ way to set the per-quantity logo cost.
 `data-pricing-mode="bulk"`. It renders inputs only — no money math, no cost basis, no logo block:
 
 ```
-Cantidad | Logo x Ubicación | Markup | Ajustes comerciales (Desc. ×n · Fin. ×n) | 🗑
+Cantidad | Logo x Ubicación | Ajustes comerciales (Desc. ×n · Fin. ×n) | 🗑
 ```
 
-Logo precedes Markup so the row reads in buildup order — cost, then markup, then commercial
-adjustments — matching the item table's left-to-right logic.
+There is no Markup column. Markup stays a per-item setting on the item page.
 
 `buildBulkRows()` mirrors `buildPvpRows()` in structure and reuses `headPctThs()` and `pctTds()`
 verbatim, so the cascading `+` / `×` column controls, the 0–100 clamping, the `flash-invalid`
 feedback and the `MAX_FILAS = 5` cap come along unchanged. `updateBulkRows()` only refreshes the
 `efect. X%` cascade labels under the last Desc. and Fin. columns; there is nothing else to compute.
 The initial ladder still comes from the inline `<script type="application/json"
-data-role="pricing-quotes">`, using only `cantidad`, `descs`, `fins`, `logoUnit` and `customMarkup`.
+data-role="pricing-quotes">`, using only `cantidad`, `descs`, `fins` and `logoUnit`.
 
 ### Column semantics
 
 **Logo x Ubicación** maps 1:1 to each quantity's `lp-input` (`quote.logoUnit`). It is the cost *per
-ubicación*; the ×1–4 ubicaciones multiplier stays a per-item setting, which is what makes the column
-safe to apply across items. It reuses the engine's existing inheritance rule: the first row is the
-`Precio base`, and rows whose value is empty inherit it — surfaced here as the base value in their
-placeholder, the table equivalent of the logo grid's `Heredado del base` tag.
-
-**Markup** is a plain optional override, not the click-to-edit `markup-view` / `markup-input` pair
-used on item pages: in bulk there is no cost basis, so there is no suggested value to display or
-revert to. Its caption reads `sin cambios` while empty.
-
-For both columns, **empty means "don't touch"** — see [Save semantics](#save-semantics).
+ubicación*; the ×1–4 ubicaciones multiplier stays a per-item setting. An empty cell is `0` and
+always overwrites, same as an empty Desc./Fin. field. There is no "leave alone" and no first-row
+inheritance in this form.
 
 **Desc. / Fin.** always replace. The cascade count is structural and an empty percent field reads as
 zero, not as "leave alone".
@@ -104,8 +96,8 @@ zero, not as "leave alone".
 - The instance is published on its root as `root.__pricingEngine`, which is how `bulk-cantidades.js`
   reaches it.
 - New public methods:
-  - `getBulkPayload()` → `[{ cantidad, logoUnit, customMarkup, descs, fins }]`
-  - `setBulkColumns({ logo, markup })` → toggles column visibility and rebuilds.
+  - `getBulkPayload()` → `[{ cantidad, logoUnit, descs, fins }]`
+  - `setBulkColumns({ logo })` → toggles Logo column visibility and rebuilds.
   - `resetBulkQuotes()` → restores the ladder from the inline JSON.
   - `setBulkQuote(i, data)` / `addBulkQuote(data)` → used by the mobile nested panel.
 - The engine has no save path in bulk mode and knows nothing about modals or offcanvases:
@@ -133,14 +125,10 @@ Because every pricing style is scoped under `.pricing-engine`, that wrapper brin
 language with essentially no new CSS: the `pe-table` borders and rounded `.table-wrap`, the grey
 `grp-ajustes` column band, the dashed-green `.add-row` button, the `pct-add` / `pct-x` column chips,
 and the `pct-eff` cascade labels. The header is the two-row `thead` the engine already builds for
-PVP mode, with `Cantidad`, `Logo x Ubicación` and `Markup` spanning both rows and `Ajustes
+PVP mode, with `Cantidad` and `Logo x Ubicación` spanning both rows and `Ajustes
 comerciales` spanning the Desc./Fin. columns.
 
-Two cells need markup that does not exist yet:
-
-- **Logo x Ubicación** reuses the `$`-prefixed input pattern of `.pvp-vol-wrap`, with a small `base`
-  caption under the first row and the base value as placeholder on later rows.
-- **Markup** is a single input with a `sin cambios` caption.
+**Logo x Ubicación** reuses the `$`-prefixed input pattern of `.pvp-vol-wrap`. Empty is `0`.
 
 Two smaller adjustments:
 
@@ -164,13 +152,13 @@ state shape, same 5-row cap (which disables `#btnAgregarCantidades` at five), sa
 Card styling needs no new CSS: `.quantities-card` and `.action-buttons` come from
 `shared/styles/sidebar.css`, already loaded here, and `v6/styles/detalle-cotizacion.css` forces
 `.saved-quantities { display: flex !important }` on this page.
-Each card summarizes one quantity as `Cantidad`, `Logo x Ubicación`, `Markup`, `Desc.`, `Fin.`,
+Each card summarizes one quantity as `Cantidad`, `Logo x Ubicación`, `Desc.`, `Fin.`,
 replacing today's `Costo extra` / `Margen` lines. Cascades render as their chain plus the effective
 figure — `10% + 5% (efect. 14,5%)` — the card equivalent of the desktop `pct-eff` label.
 
 **The nested panel edits one quantity, for both adding and editing.** A card's `Editar` button opens
 it prefilled and retitled `Editar cantidad`, rather than introducing a second editing surface. Its
-fields are Cantidad, Logo x Ubicación, Markup, then the Desc. and Fin. groups.
+fields are Cantidad, Logo x Ubicación, then the Desc. and Fin. groups.
 
 Those groups carry the mobile translation of the `+` / `×` column chips: a dashed
 `+ Agregar descuento en cascada` button under the last field of the group, and an `×` on every field
@@ -225,11 +213,11 @@ Item capabilities are read from classes already present on the rows — `item-co
 genérico-costo both run with `data-has-logo="true"` and a markup column; genérico-PVP has neither.
 No new data attributes are needed.
 
-| Target composition | Logo x Ubicación | Markup | Banner |
-| --- | --- | --- | --- |
-| No PVP items | shown | shown | standard text |
-| Only PVP items | hidden | hidden | standard text |
-| Mixed | shown | shown | adds `Logo y Markup no aplican a N ítems sin costos` |
+| Target composition | Logo x Ubicación | Banner |
+| --- | --- | --- |
+| No PVP items | shown | standard text |
+| Only PVP items | hidden | standard text |
+| Mixed | shown | adds `Logo no aplica a N ítems sin costos` |
 
 On mobile the same rule hides those fields in the nested panel and their lines in the cards.
 
@@ -239,25 +227,21 @@ every open rather than carrying over the previous session's edits.
 
 ## Save semantics
 
-Payload: one entry per row — `cantidad`, `logoUnit`, `customMarkup`, `descs[]`, `fins[]`.
+Payload: one entry per row — `cantidad`, `logoUnit`, `descs[]`, `fins[]`. Empty logo is `0`.
 
 For each target item:
 
 1. The ladder is replaced by the payload's quantities.
-2. A quantity that already existed on that item (matched by `cantidad`) keeps the per-item overrides
-   the form did not touch: always its `prodCost`, plus its `logoUnit` or `customMarkup` when the
-   corresponding cell was left empty.
-3. A quantity new to that item starts with everything on auto: base-inherited logo, tier-suggested
-   markup, `PVP ÷ divisor` product cost.
+2. A quantity that already existed on that item (matched by `cantidad`) keeps only its `prodCost`
+   (that field is not on this form). `logoUnit` is always overwritten.
+3. A quantity new to that item starts with the payload logo and auto product cost / suggested markup.
 4. Quantities the item had that are absent from the payload are dropped, along with their overrides.
-5. A filled Logo or Markup cell overwrites that quantity on every target item.
-6. `descs` and `fins` always replace.
-7. PVP targets ignore `logoUnit` and `customMarkup`.
+5. `descs` and `fins` always replace.
+6. PVP targets ignore `logoUnit`.
 
-The footer warning changes from the current blanket line to reflect rule 2:
+The footer is the same wipe warning as v5:
 
-> Al guardar se reemplazan las cantidades de los ítems alcanzados. Los costos propios de cada ítem
-> que dejes vacíos acá se conservan.
+> Al guardar, se actualizarán y reemplazarán las configuraciones previas.
 
 Since nothing persists in this prototype, saving dispatches the payload, closes the surface, and
 briefly adds a transient `row-bulk-applied` class to each target `tr.item-container` — a short
@@ -284,7 +268,7 @@ Manual, in the browser, served from the repo root:
 - v6 detalle — select two catálogo items, Cargar cantidades shows the blue banner with the count.
 - v6 detalle — select one catálogo item and the genérico-PVP item; both columns stay and the banner
   shows the "no aplican" note.
-- v6 detalle — select only the genérico-PVP item; Logo and Markup columns are gone.
+- v6 detalle — select only the genérico-PVP item; the Logo column is gone.
 - Cascade: `+` adds a Desc. column for every row up to 3, `×` removes it, `efect.` updates.
 - Ladder: `Agregar cantidad` stops at 5 rows; trash is disabled at 1 row.
 - Mobile (≤768px): cards list matches the desktop columns, nested panel adds and edits a quantity,

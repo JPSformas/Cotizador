@@ -127,9 +127,10 @@ await check('bulk table renders the v6 column set', async () => {
   const heads = await page.$$eval('[data-role="pricing-head"] th', (th) =>
     th.map((e) => e.textContent.trim())
   );
-  for (const label of ['Cantidad', 'Logo x Ubicación', 'Markup', 'Ajustes comerciales']) {
+  for (const label of ['Cantidad', 'Logo x Ubicación', 'Ajustes comerciales']) {
     assert(heads.some((h) => h.startsWith(label)), 'missing header ' + label + ' in ' + JSON.stringify(heads));
   }
+  assert(!heads.some((h) => h.startsWith('Markup')), 'Markup must not exist in bulk');
   assert(!heads.some((h) => h.includes('Costo extra')), 'Costo extra must not exist in v6');
   assert(!heads.some((h) => h.includes('Subtotal')), 'bulk mode must not show results');
   const rows = await page.$$eval('[data-role="pricing-body"] tr', (r) => r.length);
@@ -166,30 +167,28 @@ await check('bulk table cascades discount columns', async () => {
   await page.close();
 });
 
-await check('getBulkPayload reports empty logo and markup as null', async () => {
+await check('getBulkPayload reports empty logo as zero', async () => {
   const page = await open(BULK_FIXTURE);
   await page.fill('.lp-input[data-i="0"]', '500');
-  await page.fill('.markup-input[data-i="1"]', '1,35');
   await page.waitForTimeout(150);
   const payload = await page.evaluate(() =>
     document.querySelector('[data-pricing-engine]').__pricingEngine.getBulkPayload()
   );
   assert(payload.length === 3, 'expected 3 entries, got ' + payload.length);
   assert(payload[0].logoUnit === 500, 'row 0 logoUnit should be 500, got ' + payload[0].logoUnit);
-  assert(payload[0].customMarkup === null, 'row 0 markup should be null');
-  assert(payload[1].customMarkup === 1.35, 'row 1 markup should be 1.35, got ' + payload[1].customMarkup);
-  assert(payload[1].logoUnit === null, 'row 1 logoUnit should be null');
+  assert(payload[0].customMarkup === undefined, 'payload must not include customMarkup');
+  assert(payload[1].logoUnit === 0, 'empty logo must override as 0, got ' + payload[1].logoUnit);
   await page.close();
 });
 
-await check('setBulkColumns hides logo and markup', async () => {
+await check('setBulkColumns hides logo', async () => {
   const page = await open(BULK_FIXTURE);
   await page.evaluate(() =>
-    document.querySelector('[data-pricing-engine]').__pricingEngine.setBulkColumns({ logo: false, markup: false })
+    document.querySelector('[data-pricing-engine]').__pricingEngine.setBulkColumns({ logo: false })
   );
   const heads = await page.$$eval('[data-role="pricing-head"] th', (th) => th.map((e) => e.textContent.trim()));
   assert(!heads.some((h) => h.startsWith('Logo')), 'logo column should be hidden');
-  assert(!heads.some((h) => h.startsWith('Markup')), 'markup column should be hidden');
+  assert(!heads.some((h) => h.startsWith('Markup')), 'markup column should stay gone');
   assert(heads.some((h) => h.startsWith('Cantidad')), 'cantidad must survive');
   await page.close();
 });
@@ -226,9 +225,10 @@ await check('bulk cards render one card per quantity', async () => {
   const cards = await page.$$eval('.quantities-card', (c) => c.length);
   assert(cards === 3, 'expected 3 cards, got ' + cards);
   const first = await page.$eval('.quantities-card', (c) => c.textContent);
-  for (const label of ['Cantidad', 'Logo x Ubicación', 'Markup', 'Desc.', 'Fin.']) {
+  for (const label of ['Cantidad', 'Logo x Ubicación', 'Desc.', 'Fin.']) {
     assert(first.indexOf(label) !== -1, 'card missing ' + label);
   }
+  assert(first.indexOf('Markup') === -1, 'Markup must not exist on cards');
   assert(first.indexOf('Costo extra') === -1, 'Costo extra must not exist in v6');
   await page.close();
 });
@@ -237,7 +237,7 @@ await check('bulk cards show the cascade chain and effective value', async () =>
   const page = await open(CARDS_FIXTURE, { width: 390, height: 844 });
   await page.evaluate(() => {
     const e = document.querySelector('[data-pricing-engine]').__pricingEngine;
-    e.setBulkQuote(0, { cantidad: 50, descs: [10, 5], fins: [0], logoUnit: null, customMarkup: null });
+    e.setBulkQuote(0, { cantidad: 50, descs: [10, 5], fins: [0], logoUnit: 0 });
   });
   const text = await page.$eval('.quantities-card', (c) => c.textContent);
   assert(text.indexOf('10% + 5%') !== -1, 'expected the cascade chain, got ' + text);
@@ -286,7 +286,7 @@ await check('card Eliminar removes a quantity but never the last', async () => {
 
 // --- Task 4: bulk cell styling ---------------------------------------------
 
-await check('bulk logo and markup inputs are styled as plain overrides', async () => {
+await check('bulk logo inputs are styled as plain overrides', async () => {
   const page = await open(BULK_FIXTURE);
   const logo = await page.$eval('.lp-input[data-i="0"]', (el) => {
     const s = getComputedStyle(el);
@@ -294,14 +294,6 @@ await check('bulk logo and markup inputs are styled as plain overrides', async (
   });
   assert(logo.align === 'right', 'logo input should be right-aligned, got ' + logo.align);
   assert(logo.width > 60, 'logo input looks unstyled, width ' + logo.width);
-  const markup = await page.$eval('.markup-input[data-i="0"]', (el) => {
-    const s = getComputedStyle(el);
-    return { shadow: s.boxShadow, align: s.textAlign };
-  });
-  assert(markup.shadow === 'none', 'bulk markup must not use the green editing glow');
-  assert(markup.align === 'right', 'bulk markup should be right-aligned, got ' + markup.align);
-  const hint = await page.$eval('tr[data-i="0"] .lp-bulk-hint', (el) => el.textContent.trim());
-  assert(hint === 'base', 'first row should be captioned base, got ' + hint);
   await page.close();
 });
 
@@ -315,9 +307,10 @@ await check('desktop modal hosts the bulk engine', async () => {
   const heads = await page.$$eval('#modalMasElementos [data-role="pricing-head"] th', (th) =>
     th.map((e) => e.textContent.trim())
   );
-  for (const label of ['Cantidad', 'Logo x Ubicación', 'Markup', 'Ajustes comerciales']) {
+  for (const label of ['Cantidad', 'Logo x Ubicación', 'Ajustes comerciales']) {
     assert(heads.some((h) => h.startsWith(label)), 'missing header ' + label + ' in ' + JSON.stringify(heads));
   }
+  assert(!heads.some((h) => h.startsWith('Markup')), 'Markup must not exist in bulk');
   const stale = await page.$$eval('#modalMasElementos', (m) => m[0].textContent);
   assert(stale.indexOf('Costo extra') === -1, 'Costo extra still present');
   assert(stale.indexOf('Margen') === -1, 'Margen still present');
@@ -366,16 +359,16 @@ await check('Cotizar rápido targets every item with the global banner', async (
   await page.close();
 });
 
-await check('selection of two catalogo items shows both columns', async () => {
+await check('selection of two catalogo items shows the logo column', async () => {
   const page = await openDetalleAndSelect([1, 2]);
   await page.click('#btnCargarCantidadesSeleccion');
   await page.waitForSelector('#modalMasElementos.show');
   const banner = await page.$eval('#modalMasElementosContext', (e) => e.textContent.trim());
   assert(banner.indexOf('2 ítems seleccionados') !== -1, 'unexpected banner: ' + banner);
-  assert(banner.indexOf('no aplican') === -1, 'should not warn when no PVP item is targeted');
+  assert(banner.indexOf('no aplica') === -1, 'should not warn when no PVP item is targeted');
   const heads = await page.$$eval('#modalMasElementos [data-role="pricing-head"] th', (th) => th.map((e) => e.textContent.trim()));
   assert(heads.some((h) => h.startsWith('Logo')), 'logo column expected');
-  assert(heads.some((h) => h.startsWith('Markup')), 'markup column expected');
+  assert(!heads.some((h) => h.startsWith('Markup')), 'markup column must not exist');
   await page.close();
 });
 
@@ -384,19 +377,19 @@ await check('mixed selection keeps the columns and warns', async () => {
   await page.click('#btnCargarCantidadesSeleccion');
   await page.waitForSelector('#modalMasElementos.show');
   const banner = await page.$eval('#modalMasElementosContext', (e) => e.textContent.trim());
-  assert(banner.indexOf('no aplican a 1') !== -1, 'expected the skip note, got ' + banner);
+  assert(banner.indexOf('Logo no aplica a 1') !== -1, 'expected the skip note, got ' + banner);
   const heads = await page.$$eval('#modalMasElementos [data-role="pricing-head"] th', (th) => th.map((e) => e.textContent.trim()));
   assert(heads.some((h) => h.startsWith('Logo')), 'logo column expected in a mixed target');
   await page.close();
 });
 
-await check('PVP-only selection hides logo and markup', async () => {
+await check('PVP-only selection hides logo', async () => {
   const page = await openDetalleAndSelect([4]);
   await page.click('#btnCargarCantidadesSeleccion');
   await page.waitForSelector('#modalMasElementos.show');
   const heads = await page.$$eval('#modalMasElementos [data-role="pricing-head"] th', (th) => th.map((e) => e.textContent.trim()));
   assert(!heads.some((h) => h.startsWith('Logo')), 'logo column should be hidden');
-  assert(!heads.some((h) => h.startsWith('Markup')), 'markup column should be hidden');
+  assert(!heads.some((h) => h.startsWith('Markup')), 'markup column must not exist');
   assert(heads.some((h) => h.startsWith('Cantidad')), 'cantidad must survive');
   await page.close();
 });
@@ -426,7 +419,7 @@ await check('saving applies the payload and flashes the targets', async () => {
   const payload = await page.evaluate(() => window.bulkCantidades.getLastPayload());
   assert(payload.rows[0].cantidad === 250, 'expected cantidad 250, got ' + payload.rows[0].cantidad);
   assert(payload.rows[0].logoUnit === 500, 'expected logoUnit 500, got ' + payload.rows[0].logoUnit);
-  assert(payload.rows[1].logoUnit === null, 'row 1 logo should stay null');
+  assert(payload.rows[1].logoUnit === 0, 'empty logo must override as 0, got ' + payload.rows[1].logoUnit);
   assert(payload.targets.length === 2, 'expected 2 targets, got ' + payload.targets.length);
   await page.close();
 });
