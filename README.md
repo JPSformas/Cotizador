@@ -21,6 +21,16 @@ Serví siempre la **raíz del repo** (esta carpeta). Si el document root es `v5/
 - `v6/` — motor de precios por volumen y páginas que lo usan
 - `docs/` — comparación v4 vs v5, screenshots, y el script Playwright
 
+## Verificación
+
+```bash
+npm run verify:bulk            # todas las comprobaciones
+npm run verify:bulk -- --only=mobile
+```
+
+Levanta un servidor estático en el puerto 8099 y recorre v6 y v5 con Playwright.
+Requiere `npx playwright install chromium` la primera vez.
+
 ## Tecnologías
 
 HTML5, CSS3, JavaScript, Bootstrap 5, Font Awesome 7.0.1

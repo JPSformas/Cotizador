@@ -581,6 +581,28 @@
   background: #fbfbfa;
 }
 
+/* --- Bulk mode (modal / offcanvas "Cargar cantidades") --- */
+.pricing-engine .lp-bulk-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pricing-engine .lp-bulk-wrap > span {
+  font-size: 13px;
+  color: var(--pe-muted);
+}
+.pricing-engine .lp-bulk-wrap input {
+  width: 92px;
+  padding: 6px 8px;
+  border: 1px solid #d8d8d5;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  text-align: right;
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
 @media (max-width: 768px) {
   .pricing-engine .logo-config { flex-direction: column; gap: 16px; }
   .pricing-engine .logo-col { min-width: 0; }
@@ -592,4 +614,5 @@
   .pricing-engine .pvp-vol-input { width: 80px; }
   .pricing-engine .pct { width: 40px; }
   .pricing-engine .markup-input { width: 52px; }
+  .pricing-engine .lp-bulk-wrap input { width: 76px; }
 }

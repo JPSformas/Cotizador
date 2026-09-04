@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const nestedSidebar = document.getElementById('nestedSidebar');
     const btnBackNestedSidebar = document.getElementById('btnBackNestedSidebar');
     const mainSidebar = document.getElementById('sidebarMasElementos');
+    if (mainSidebar && mainSidebar.hasAttribute('data-bulk-managed')) return;
     const offcanvasFooter = document.querySelector('.offcanvas-footer');
 
     if (btnAgregarCantidades && nestedSidebar && btnBackNestedSidebar) {

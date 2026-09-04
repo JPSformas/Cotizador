@@ -119,7 +119,11 @@
     this.root = root;
     this.pricingMode = (root.getAttribute('data-pricing-mode') || 'costo').toLowerCase();
     this.isPvpMode = this.pricingMode === 'pvp';
-    this.hasLogo = !this.isPvpMode && root.getAttribute('data-has-logo') !== 'false';
+    this.isBulkMode = this.pricingMode === 'bulk';
+    this.bulkView = root.getAttribute('data-pricing-view') || 'table';
+    this.showLogoCol = root.getAttribute('data-bulk-logo') !== 'false';
+    this.showMarkupCol = false;
+    this.hasLogo = !this.isPvpMode && !this.isBulkMode && root.getAttribute('data-has-logo') !== 'false';
     this.divisor = parseFloat(root.getAttribute('data-cost-divisor')) || 1.65;
     // 'prorated' -> setup divided across the row quantity (SETUP Prorrateado)
     // 'flat'     -> setup added per unit as-is
@@ -172,16 +176,18 @@
     this.el = {
       head: r.querySelector('[data-role="pricing-head"]'),
       body: r.querySelector('[data-role="pricing-body"]'),
+      cards: r.querySelector('[data-role="pricing-cards"]'),
       grid: r.querySelector('[data-role="logo-grid"]'),
-      addBtn: r.querySelector('[data-role="add-row"]'),
+      addBtn: r.querySelector('[data-action="add-row"]'),
       colores: r.querySelector('[data-role="colores"]'),
       metodo: r.querySelector('[data-role="metodo"]'),
       metodoDesc: r.querySelector('[data-role="metodo-desc"]'),
       ubicVal: r.querySelector('[data-role="ubic-val"]'),
       costoHint: r.querySelector('[data-role="costo-producto-hint"]')
     };
-    this.pvpInput = document.querySelector('[data-pricing-pvp]');
-    this.setupInput = document.querySelector('[data-pricing-setup]');
+    var isBulk = r.getAttribute('data-pricing-mode') === 'bulk';
+    this.pvpInput = isBulk ? null : document.querySelector('[data-pricing-pvp]');
+    this.setupInput = isBulk ? null : document.querySelector('[data-pricing-setup]');
   };
 
   PricingEngine.prototype.getPvp = function () {
@@ -214,7 +220,7 @@
       } else if (t.matches('.prod-input')) {
         self.commitProd(+t.getAttribute('data-i'));
       } else if (t.matches('.markup-input')) {
-        self.commitMk(+t.getAttribute('data-i'));
+        if (!self.isBulkMode) self.commitMk(+t.getAttribute('data-i'));
       }
     });
 
@@ -245,6 +251,12 @@
         case 'edit-mk': self.editMk(i); break;
         case 'mk-btn': self.mkBtn(i); break;
         case 'remove-row': self.removeRow(i); break;
+        case 'edit-card':
+          r.dispatchEvent(new CustomEvent('pricing-bulk-edit-row', {
+            detail: { index: i },
+            bubbles: true
+          }));
+          break;
         case 'add-row': self.addRow(); break;
         case 'add-col': self.addCol(t.getAttribute('data-field')); break;
         case 'remove-col': self.removeCol(t.getAttribute('data-field')); break;
@@ -272,21 +284,26 @@
     if (this.setupInput) {
       this.setupInput.addEventListener('input', function () { self.updateAll(); });
     }
-    // Recompute after the PVP refresh mock rewrites the field programmatically.
-    var refreshBtn = document.querySelector('[data-pricing-refresh]');
-    if (refreshBtn) {
-      refreshBtn.addEventListener('click', function () {
-        setTimeout(function () { self.updateAll(); }, 0);
-      });
-    }
-    var saveBtn = document.querySelector('[data-pricing-save]');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', function () { self.save(saveBtn); });
+    if (!this.isBulkMode) {
+      var refreshBtn = document.querySelector('[data-pricing-refresh]');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', function () {
+          setTimeout(function () { self.updateAll(); }, 0);
+        });
+      }
+      var saveBtn = document.querySelector('[data-pricing-save]');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', function () { self.save(saveBtn); });
+      }
     }
   };
 
   // Read what the user typed in the DOM back into the state array.
   PricingEngine.prototype.syncFromDom = function () {
+    if (this.isBulkMode) {
+      this.syncBulkFromDom();
+      return;
+    }
     var self = this;
     this.quotes.forEach(function (q, i) {
       var c = self.root.querySelector('.cantidad[data-i="' + i + '"]');
@@ -384,6 +401,10 @@
   };
 
   PricingEngine.prototype.buildRows = function () {
+    if (this.isBulkMode) {
+      this.buildBulkRows();
+      return;
+    }
     if (this.isPvpMode) {
       this.buildPvpRows();
       return;
@@ -507,6 +528,221 @@
 
     if (this.el.addBtn) this.el.addBtn.disabled = this.quotes.length >= MAX_FILAS;
     this.updateAll();
+  };
+
+  PricingEngine.prototype.buildBulkRows = function () {
+    if (this.bulkView === 'cards') {
+      this.buildBulkCards();
+      return;
+    }
+    if (this.el.head) {
+      this.el.head.innerHTML = '<tr>'
+        + '<th rowspan="2">Cantidad</th>'
+        + (this.showLogoCol ? '<th class="grp-costos" rowspan="2">Logo x Ubicación</th>' : '')
+        + '<th class="grp-ajustes" colspan="' + (this.nDesc + this.nFin) + '">Ajustes comerciales</th>'
+        + '<th rowspan="2"></th>'
+        + '</tr><tr>'
+        + this.headPctThs('descs', 'Desc. adicional', 'Desc.', this.nDesc)
+        + this.headPctThs('fins', 'Financiación', 'Fin.', this.nFin)
+        + '</tr>';
+    }
+
+    this.el.body.innerHTML = this.quotes.map(function (q, i) {
+      var logoTd = this.showLogoCol
+        ? '<td class="grp-costos">'
+          + '<div class="lp-bulk-wrap"><span>$</span>'
+          + '<input class="lp-input" type="text" inputmode="numeric" data-i="' + i + '" value="'
+          + (q.logoUnit ? inputVal(q.logoUnit) : '') + '"></div>'
+          + '</td>'
+        : '';
+      return '<tr data-i="' + i + '">'
+        + '<td><input class="cantidad" type="text" data-i="' + i + '" value="' + q.cantidad + '"></td>'
+        + logoTd
+        + this.pctTds(i, 'descs', 'desc-input', 'desc-eff')
+        + this.pctTds(i, 'fins', 'fin-input', 'fin-eff')
+        + '<td class="trash"><button type="button" class="trash-btn" data-action="remove-row" data-i="' + i
+        + '" title="Eliminar cantidad" aria-label="Eliminar cantidad"'
+        + (this.quotes.length <= 1 ? ' disabled' : '') + '>' + ICONS.trash + '</button></td>'
+        + '</tr>';
+    }, this).join('');
+
+    if (this.el.addBtn) this.el.addBtn.disabled = this.quotes.length >= MAX_FILAS;
+    this.updateAll();
+  };
+
+  PricingEngine.prototype.updateBulkRows = function () {
+    if (this.bulkView === 'cards') {
+      this.updateBulkCards();
+      return;
+    }
+    var self = this;
+
+    this.quotes.forEach(function (q, i) {
+      var tr = self.el.body.querySelector('tr[data-i="' + i + '"]');
+      if (!tr) return;
+
+      var descFactor = 1, finFactor = 1;
+      q.descs.forEach(function (d) { descFactor *= (1 - d / 100); });
+      q.fins.forEach(function (f) { finFactor *= (1 + f / 100); });
+
+      var dEff = tr.querySelector('.desc-eff');
+      if (dEff) {
+        dEff.textContent = 'efect. ' + fmtPct(1 - descFactor);
+        dEff.title = q.descs.map(function (d) { return d + '%'; }).join(' + ') + ' en cascada';
+      }
+      var fEff = tr.querySelector('.fin-eff');
+      if (fEff) {
+        fEff.textContent = 'efect. ' + fmtPct(finFactor - 1);
+        fEff.title = q.fins.map(function (f) { return f + '%'; }).join(' + ') + ' en cascada';
+      }
+    });
+  };
+
+  PricingEngine.prototype.cascadeText = function (arr, kind) {
+    if (!arr.length) return '—';
+    var isDesc = kind === 'desc';
+    var chain = arr.map(function (v) { return v + '%'; }).join(' + ');
+    var factor = 1;
+    arr.forEach(function (v) { factor *= isDesc ? (1 - v / 100) : (1 + v / 100); });
+    var eff = isDesc ? (1 - factor) : (factor - 1);
+    return (arr.length > 1) ? (chain + ' (efect. ' + fmtPct(eff) + ')') : chain;
+  };
+
+  PricingEngine.prototype.buildBulkCards = function () {
+    if (!this.el.cards) return;
+
+    this.el.cards.innerHTML = this.quotes.map(function (q, i) {
+      var logoLine = this.showLogoCol
+        ? '<div class="fieldLabel">Logo x Ubicación: <span class="fieldValue" data-role="card-logo"></span></div>'
+        : '';
+      return '<div class="quantities-card" data-i="' + i + '">'
+        + '<div class="fieldLabel">Cantidad: <span class="fieldValue" data-role="card-cantidad"></span></div>'
+        + logoLine
+        + '<div class="fieldLabel">Desc.: <span class="fieldValue" data-role="card-desc"></span></div>'
+        + '<div class="fieldLabel">Fin.: <span class="fieldValue" data-role="card-fin"></span></div>'
+        + '<div class="action-buttons">'
+        + '<button type="button" class="edit-btn-mobile" data-action="edit-card" data-i="' + i + '"><span>Editar</span></button>'
+        + '<button type="button" class="delete-btn-mobile" data-action="remove-row" data-i="' + i + '"'
+        + (this.quotes.length <= 1 ? ' disabled' : '') + '><span>Eliminar</span></button>'
+        + '</div>'
+        + '</div>';
+    }, this).join('');
+
+    if (this.el.addBtn) this.el.addBtn.disabled = this.quotes.length >= MAX_FILAS;
+    var btnAgregarCantidades = document.getElementById('btnAgregarCantidades');
+    if (btnAgregarCantidades) btnAgregarCantidades.disabled = this.quotes.length >= MAX_FILAS;
+    this.updateBulkCards();
+  };
+
+  PricingEngine.prototype.updateBulkCards = function () {
+    if (!this.el.cards) return;
+    var self = this;
+
+    this.quotes.forEach(function (q, i) {
+      var card = self.el.cards.querySelector('.quantities-card[data-i="' + i + '"]');
+      if (!card) return;
+      var set = function (role, text) {
+        var el = card.querySelector('[data-role="' + role + '"]');
+        if (el) el.textContent = text;
+      };
+      set('card-cantidad', fmtQty(q.cantidad));
+      if (self.showLogoCol) {
+        set('card-logo', money(q.logoUnit || 0));
+      }
+      set('card-desc', self.cascadeText(q.descs, 'desc'));
+      set('card-fin', self.cascadeText(q.fins, 'fin'));
+    });
+  };
+
+  PricingEngine.prototype.growCascades = function (data) {
+    var changed = false;
+    if (data.descs && data.descs.length > this.nDesc) {
+      this.nDesc = Math.min(MAX_PCT, data.descs.length);
+      changed = true;
+    }
+    if (data.fins && data.fins.length > this.nFin) {
+      this.nFin = Math.min(MAX_PCT, data.fins.length);
+      changed = true;
+    }
+    if (!changed) return;
+    this.quotes.forEach(function (q) {
+      while (q.descs.length < this.nDesc) q.descs.push(0);
+      while (q.fins.length < this.nFin) q.fins.push(0);
+    }, this);
+  };
+
+  PricingEngine.prototype.setBulkQuote = function (i, data) {
+    var q = this.quotes[i];
+    if (!q) return;
+    this.growCascades(data);
+    if (data.cantidad != null) q.cantidad = Math.max(0, data.cantidad);
+    q.logoUnit = (data.logoUnit == null || data.logoUnit === '') ? 0 : data.logoUnit;
+    if (data.descs) q.descs = data.descs.slice(0, this.nDesc);
+    if (data.fins) q.fins = data.fins.slice(0, this.nFin);
+    while (q.descs.length < this.nDesc) q.descs.push(0);
+    while (q.fins.length < this.nFin) q.fins.push(0);
+    this.buildRows();
+  };
+
+  PricingEngine.prototype.addBulkQuote = function (data) {
+    if (this.quotes.length >= MAX_FILAS) return;
+    this.growCascades(data || {});
+    this.quotes.push({
+      cantidad: (data && data.cantidad) || 0,
+      logoUnit: (data && data.logoUnit != null && data.logoUnit !== '') ? data.logoUnit : 0,
+      descs: (data && data.descs) ? data.descs.slice(0, this.nDesc) : zeros(this.nDesc),
+      fins: (data && data.fins) ? data.fins.slice(0, this.nFin) : zeros(this.nFin),
+      prodCost: null,
+      precioVolumen: null
+    });
+    var last = this.quotes[this.quotes.length - 1];
+    while (last.descs.length < this.nDesc) last.descs.push(0);
+    while (last.fins.length < this.nFin) last.fins.push(0);
+    this.buildRows();
+  };
+
+  PricingEngine.prototype.syncBulkFromDom = function () {
+    var self = this;
+    this.quotes.forEach(function (q, i) {
+      var c = self.root.querySelector('.cantidad[data-i="' + i + '"]');
+      if (c) q.cantidad = Math.max(0, parseNum(c.value));
+      q.descs = self.readPcts(i, 'desc-input', q.descs);
+      q.fins = self.readPcts(i, 'fin-input', q.fins);
+      var l = self.root.querySelector('.lp-input[data-i="' + i + '"]');
+      if (l) {
+        var raw = l.value.trim();
+        q.logoUnit = (raw === '') ? 0 : parseMoney(raw);
+      }
+    });
+  };
+
+  PricingEngine.prototype.getBulkPayload = function () {
+    this.syncFromDom();
+    return this.quotes.map(function (q) {
+      return {
+        cantidad: q.cantidad,
+        logoUnit: q.logoUnit || 0,
+        descs: q.descs.slice(),
+        fins: q.fins.slice()
+      };
+    });
+  };
+
+  PricingEngine.prototype.setBulkColumns = function (opts) {
+    this.syncFromDom();
+    this.showLogoCol = (opts && opts.logo) !== false;
+    this.buildRows();
+  };
+
+  PricingEngine.prototype.resetBulkQuotes = function () {
+    this.quotes = this.loadInitialQuotes();
+    this.nDesc = Math.min(MAX_PCT, Math.max(1, this.quotes[0].descs.length));
+    this.nFin = Math.min(MAX_PCT, Math.max(1, this.quotes[0].fins.length));
+    this.quotes.forEach(function (q) {
+      while (q.descs.length < this.nDesc) q.descs.push(0);
+      while (q.fins.length < this.nFin) q.fins.push(0);
+    }, this);
+    this.buildRows();
   };
 
   PricingEngine.prototype.addRow = function () {
@@ -643,6 +879,10 @@
   };
 
   PricingEngine.prototype.updateAll = function () {
+    if (this.isBulkMode) {
+      this.updateBulkRows();
+      return;
+    }
     if (this.isPvpMode) {
       this.updatePvpRows();
       return;
@@ -817,8 +1057,11 @@
   };
 
   function init() {
-    var root = document.querySelector('[data-pricing-engine]');
-    if (root) new PricingEngine(root);
+    var roots = document.querySelectorAll('[data-pricing-engine]');
+    for (var i = 0; i < roots.length; i++) {
+      if (roots[i].__pricingEngine) continue;
+      roots[i].__pricingEngine = new PricingEngine(roots[i]);
+    }
   }
 
   if (document.readyState === 'loading') {

@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const modalCantidades = document.getElementById("modalMasElementos");
-    if (modalCantidades) {
+    if (modalCantidades && !modalCantidades.hasAttribute("data-bulk-managed")) {
         modalCantidades.addEventListener("show.bs.modal", (e) => {
             updateSelectionContext(
                 "modalMasElementosContext",
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const sidebarCantidades = document.getElementById("sidebarMasElementos");
-    if (sidebarCantidades) {
+    if (sidebarCantidades && !sidebarCantidades.hasAttribute("data-bulk-managed")) {
         sidebarCantidades.addEventListener("show.bs.offcanvas", (e) => {
             updateSelectionContext(
                 "sidebarMasElementosContext",
