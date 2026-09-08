@@ -265,17 +265,19 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
     
-    // Add click events to all image items for selection (product and zakeke images)
-    document.querySelectorAll('#productImagesGrid .image-item, #zakekeImagesGrid .image-item').forEach(item => {
-      item.addEventListener('click', (e) => {
-        // Only select if not clicking the delete button or badge
-        if (!e.target.classList.contains('image-delete-btn') && 
-            !e.target.closest('.image-delete-btn') &&
-            !e.target.classList.contains('selection-number-badge')) {
-          handleImageSelect(item);
+    if (imageModal) {
+      imageModal.addEventListener('click', (e) => {
+        if (e.target.closest('#uploadedImagesGrid')) return;
+        if (e.target.classList.contains('image-delete-btn') ||
+            e.target.closest('.image-delete-btn') ||
+            e.target.classList.contains('selection-number-badge')) {
+          return;
         }
+        const item = e.target.closest('.image-item');
+        if (!item || !imageModal.contains(item)) return;
+        handleImageSelect(item);
       });
-    });
+    }
     
     // Handle image deletion (only for uploaded images)
     function handleImageDelete(imageItem) {
