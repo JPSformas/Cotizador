@@ -26,6 +26,8 @@ Serví siempre la **raíz del repo** (esta carpeta). Si el document root es `v5/
 ```bash
 npm run verify:bulk            # todas las comprobaciones
 npm run verify:bulk -- --only=mobile
+npm run test:boceteador      # unit tests of the Boceteador adapters
+npm run verify:boceteador    # Playwright: Personalizar embed on v5/v6 editItem
 ```
 
 Levanta un servidor estático en el puerto 8099 y recorre v6 y v5 con Playwright.
