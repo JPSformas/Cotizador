@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "verify:bulk": "node docs/verify-bulk-cantidades.mjs"
+    "verify:bulk": "node docs/verify-bulk-cantidades.mjs",
+    "test:boceteador": "node --test shared/js-scripts/boceteador/*.test.mjs"
   },
   "keywords": [],
   "author": "",

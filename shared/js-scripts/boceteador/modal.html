@@ -1,0 +1,228 @@
+<!-- ============ Modal: boceteador "Cargá tu logo" ============ -->
+<div id="formas-boceto-modal" hidden>
+  <div class="bm-backdrop" id="bocetoBackdrop"></div>
+  <div class="bm-shell" role="dialog" aria-label="Cargá tu logo">
+    <div class="bm-head">
+      <div>
+        <div class="bm-eyebrow">your brand loved</div>
+        <h2 class="bm-title">Cargá tu logo</h2>
+      </div>
+      <button type="button" class="bm-close" id="bocetoClose" aria-label="Cerrar" title="Cerrar (el trabajo no se pierde)">×</button>
+    </div>
+    <div id="cropModal" hidden>
+      <div class="cm-card">
+        <div class="cm-head">
+          <h3>Recorte manual del logo</h3>
+          <button type="button" id="cropBgBtn" aria-pressed="false" title="Fondo oscuro para ver logos blancos con transparencia">🌙 Fondo oscuro</button>
+          <button type="button" class="bm-close" id="cropClose" aria-label="Cerrar">×</button>
+        </div>
+        <p class="cm-hint">Ajustá el rectángulo al logo real: lo de afuera se descarta para la medida y el boceto. Arrastrá el cuadro para moverlo y las esquinas para cambiar el tamaño.</p>
+        <div id="cropStageWrap">
+          <div id="cropStage">
+            <div id="cropArea">
+              <img id="cropImg" alt="Logo original">
+              <div id="cropRect">
+                <span class="handle tl" data-corner="tl"></span><span class="handle tr" data-corner="tr"></span>
+                <span class="handle bl" data-corner="bl"></span><span class="handle br" data-corner="br"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cm-actions">
+          <button type="button" class="btn btn-secondary" id="cropAuto">Detectar automático</button>
+          <button type="button" class="btn btn-primary" id="cropApply">Aplicar recorte</button>
+        </div>
+      </div>
+    </div>
+    <div class="bm-body">
+      <div class="grid">
+
+    <!-- ============ ESCENARIO ============ -->
+    <div class="col" id="stageCol">
+      <div class="card stage-card">
+        <button type="button" id="cleanToggle" aria-pressed="false" hidden>👁 Ocultar guías</button>
+        <div id="zoomCtrls" hidden>
+          <button type="button" id="zoomOut" title="Alejar">−</button>
+          <span id="zoomLabel">100%</span>
+          <button type="button" id="zoomIn" title="Acercar">＋</button>
+          <button type="button" id="zoomReset" title="Volver al 100%">⟲</button>
+        </div>
+        <div id="alignCtrls" hidden>
+          <button type="button" id="alignH" title="Centrar el logo horizontalmente en el área">⇔</button>
+          <button type="button" id="alignV" title="Centrar el logo verticalmente en el área">⇕</button>
+        </div>
+        <div id="frameWrap">
+          <div id="emptyState" class="slot">
+            <span class="big">Cargando la foto del producto</span>
+            <p>Usamos la imagen que estás viendo en la ficha. Si no aparece, cerrá y volvé a abrir.</p>
+          </div>
+          <div id="frame" hidden>
+            <img id="photo" alt="Producto">
+            <div id="zone" hidden>
+              <span class="handle tl" data-corner="tl"></span><span class="handle tr" data-corner="tr"></span>
+              <span class="handle bl" data-corner="bl"></span><span class="handle br" data-corner="br"></span>
+            </div>
+            <div id="measureChip" hidden></div>
+            <div id="ruler" hidden>
+              <div id="rulerLine"><i></i><i></i></div>
+              <span class="ruler-handle" id="rh1"></span>
+              <span class="ruler-handle" id="rh2"></span>
+              <span id="rulerLabel"></span>
+            </div>
+          </div>
+          <div id="drawHint" hidden><span>Arrastrá sobre la foto para marcar el área de impresión</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ PASOS ============ -->
+    <div class="col">
+
+      <!-- Modo de medida -->
+      <div class="card step" id="modeCard">
+        <div class="label" style="margin-bottom:10px">¿Con qué dato contás?</div>
+        <div class="mode-row">
+          <button type="button" class="mode-opt" id="modeLogo" aria-pressed="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#000085" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="7" y="9" width="12" height="10" rx="2"/>
+              <path d="M7 5h12M7 3.5v3M19 3.5v3"/>
+              <path d="M3 9v10M1.5 9h3M1.5 19h3"/>
+            </svg>
+            <span class="t">Tengo la medida exacta del logo<small>Marcás el área, cargás el logo y anotás su ancho × alto en cm.</small></span>
+          </button>
+          <button type="button" class="mode-opt" id="modeProduct" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#000085" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="9" width="20" height="6" rx="1.5"/>
+              <path d="M6 9v3M10 9v4.5M14 9v3M18 9v4.5"/>
+            </svg>
+            <span class="t">Sé la medida del producto<small>Calibrás con la regla sobre la foto y los cm se calculan solos.</small></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Paso 1: producto -->
+      <div class="card step done" id="step1">
+        <div class="step-head"><span class="step-num">1</span><h2>Foto del producto</h2></div>
+        <div id="photoPick">
+          <span class="label" style="letter-spacing:.08em">Elegí sobre qué foto va el logo</span>
+          <div class="photoPick-row" id="photoPickRow"></div>
+          <p class="photoPick-hint" id="photoPickHint">Si cambiás de foto, el área y los logos se reinician.</p>
+        </div>
+        <label class="upload-tile" for="photoInput" hidden>
+          <span class="thumb slot" id="photoThumb">📷</span>
+          <span class="txt" id="photoTxt">Elegir foto del producto<small>JPG o PNG · se recomienda recortada al producto</small></span>
+        </label>
+        <input type="file" id="photoInput" accept="image/png,image/jpeg,image/webp" hidden>
+        <div class="field" id="rulerField">
+          <span class="label" style="letter-spacing:.08em">Escala real · regla</span>
+          <div class="field-row" style="margin-top:0">
+            <div class="field" style="margin-top:0;flex:1.2">
+              <div class="suffix-wrap"><input type="number" id="rulerCm" placeholder="Centímetros" min="0.5" max="500" step="0.1"><span class="suffix">cm</span></div>
+            </div>
+            <div class="field" style="margin-top:0">
+              <button class="btn btn-secondary" type="button" id="rulerToggle" style="padding:9px 12px" disabled>Ocultar regla</button>
+            </div>
+          </div>
+          <small style="color:var(--text-muted);font-size:11.5px">Llevá los extremos de la regla de lado a lado del producto en la foto y anotá cuánto mide esa distancia en la vida real. Con eso las medidas del logo se calculan solas.</small>
+        </div>
+      </div>
+
+      <!-- Paso 2: área -->
+      <div class="card step locked" id="step2">
+        <div class="step-head"><span class="step-num">2</span><h2>Área de impresión</h2></div>
+        <button class="btn btn-secondary" type="button" id="drawZoneBtn">Marcar área sobre la foto</button>
+        <div class="readout" id="zoneReadout" hidden>
+          <div class="row"><span class="label">Área marcada</span><span class="val num" id="zoneSizeOut">—</span></div>
+        </div>
+      </div>
+
+      <!-- Paso 3: logo -->
+      <div class="card step locked" id="step3">
+        <div class="step-head"><span class="step-num">3</span><h2>Logo</h2></div>
+        <label class="upload-tile" for="logoInput">
+          <span class="thumb slot" id="logoThumb">◐</span>
+          <span class="txt" id="logoTxt">Elegir logo<small>PNG sin fondo recomendado · también SVG, JPG, PDF o AI</small></span>
+        </label>
+        <input type="file" id="logoInput" accept="image/png,image/jpeg,image/svg+xml,image/webp,.pdf,.ai,application/pdf" hidden>
+        <div class="logoChips" id="logoChips" hidden></div>
+        <button class="btn btn-secondary" type="button" id="addLogoBtn" style="margin-top:10px" hidden>＋ Agregar otro logo</button>
+        <div class="field" id="unitField" hidden>
+          <span class="label" style="letter-spacing:.08em">Unidad de las medidas</span>
+          <div class="seg" style="margin-top:0">
+            <button type="button" id="unitCm" aria-pressed="true">Centímetros (cm)</button>
+            <button type="button" id="unitMm" aria-pressed="false">Milímetros (mm)</button>
+          </div>
+        </div>
+        <div class="field-row" id="logoCmFields" hidden>
+          <div class="field">
+            <span class="label" style="letter-spacing:.08em">Ancho del logo</span>
+            <div class="suffix-wrap"><input type="number" id="logoWcm" placeholder="Ancho" min="0.1" max="200" step="0.1"><span class="suffix">cm</span></div>
+          </div>
+          <button type="button" class="lockBtn" id="lockAspectBtn" aria-pressed="false" title="Proporción desanclada — clic para anclar">🔗</button>
+          <div class="field">
+            <span class="label" style="letter-spacing:.08em">Alto del logo</span>
+            <div class="suffix-wrap"><input type="number" id="logoHcm" placeholder="Alto" min="0.1" max="200" step="0.1"><span class="suffix">cm</span></div>
+          </div>
+        </div>
+        <button class="btn btn-secondary" type="button" id="removeWhiteBtn" style="margin-top:10px" hidden>Quitar fondo blanco</button>
+        <button class="btn btn-secondary" type="button" id="cropEditBtn" hidden>✂ Editar recorte</button>
+        <div id="logoTools" hidden>
+          <div class="label" style="margin-top:12px;letter-spacing:.08em">Color del logo</div>
+          <div class="seg" id="tintSeg">
+            <button type="button" data-tint="original" aria-pressed="true">Full color</button>
+            <button type="button" data-tint="white" aria-pressed="false">Blanco</button>
+            <button type="button" data-tint="black" aria-pressed="false">Negro</button>
+            <button type="button" data-tint="engrave" aria-pressed="false" title="Efecto de grabado metálico">Grabado</button>
+          </div>
+          <div class="field">
+            <span class="label" style="letter-spacing:.08em">Opacidad · <span id="opacityVal">100%</span></span>
+            <input type="range" id="logoOpacity" min="10" max="100" value="100">
+          </div>
+        </div>
+        <div class="note" id="jpgNote" hidden>⚠ <span>Tu logo no tiene transparencia: sobre productos oscuros se verá con fondo. Probá el botón "Quitar fondo blanco".</span></div>
+        <div class="note" id="undoNote" hidden>🗑 <span id="undoNoteTxt"></span> <button type="button" id="undoDeleteBtn">Deshacer</button></div>
+        <div class="note" id="trimNote" hidden>✂ <span id="trimNoteTxt">Se recortaron los márgenes vacíos del logo: la medida corresponde al logo real, no al recuadro del archivo.</span> <button type="button" id="trimUndo">Deshacer recorte</button></div>
+        <div class="readout" id="logoReadout" hidden>
+          <div class="row"><span class="label">Logo aplicado</span><span class="val num" id="logoSizeOut">—</span></div>
+        </div>
+        <div class="note" id="needMeasureNote" hidden>📏 <span></span></div>
+      </div>
+
+      <!-- Paso 4: técnica + descarga -->
+      <div class="card step locked" id="step4">
+        <div class="step-head"><span class="step-num">4</span><h2>Técnica y aplicación</h2></div>
+        <div class="field" id="bcColoresField" style="margin-top:0; margin-bottom:14px">
+          <span class="label" style="letter-spacing:.08em">Colores de impresión</span>
+          <div class="codeToggle" style="margin-top:6px">
+            <button type="button" id="bcCodeHex" aria-pressed="true">Código HEX</button>
+            <button type="button" id="bcCodePant" aria-pressed="false">Pantone</button>
+          </div>
+          <div id="bocetoColors"></div>
+          <button type="button" class="addColor" id="bcAddColor" style="margin-top:6px">＋ Agregar color</button>
+        </div>
+        <div class="field" style="margin-top:0">
+          <span class="label" style="letter-spacing:.08em">Técnica de aplicación</span>
+          <select id="technique">
+            <option value="">Elegí la técnica…</option>
+            <option>DTP Full Color</option>
+            <option>DTF</option>
+            <option>Serigrafía</option>
+            <option>Tampografía</option>
+            <option>Grabado láser</option>
+            <option>Bordado</option>
+            <option>Vinilo</option>
+            <option>Sublimación</option>
+            <option value="__otra">Otra…</option>
+          </select>
+          <input type="text" id="techniqueOther" placeholder="Escribí la técnica" style="margin-top:8px" hidden>
+        </div>
+        <button class="btn btn-primary" type="button" id="applyBtn" style="margin-top:12px">Guardar personalización</button>
+        <button class="btn btn-secondary" type="button" id="downloadBtn">Descargar PNG</button>
+        <small style="display:block;margin-top:8px;color:var(--text-muted);font-size:11.5px">Al guardar, el mockup se agrega a las fotos del producto. La imagen va limpia, sin regla ni marcas de área.</small>
+      </div>
+
+    </div>
+  </div>
+    </div>
+  </div>
+</div>
