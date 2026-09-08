@@ -393,7 +393,7 @@
 }
 .pricing-engine .prod-edit:hover,
 .pricing-engine .markup-edit:hover { 
-  color: #1a1a1a;
+  color: var(--brand-secondary);
   transform: scale(1.15); 
 }
 
@@ -464,7 +464,7 @@
   justify-content: center;
   flex-shrink: 0;
 }
-.pricing-engine .pct-add:hover { border-color: var(--pe-green); color: var(--pe-green); background: #f4fbf0; }
+.pricing-engine .pct-add:hover { border-color: var(--brand-secondary); color: var(--brand-secondary); background: #f0f3fb; }
 .pricing-engine .pct-x { border-style: solid; }
 .pricing-engine .pct-x:hover { color: #a33; border-color: #cc9999; background: #f6eeee; }
 .pricing-engine .pct-eff {
@@ -539,21 +539,7 @@
 /* Add row */
 .pricing-engine .add-row {
   margin-top: 12px;
-  padding: 9px 16px;
-  border: 1px dashed var(--pe-green-border);
-  border-radius: 6px;
-  background: #f4fbf0;
-  color: var(--pe-green);
   font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-}
-.pricing-engine .add-row:hover { background: #eaf6e1; }
-.pricing-engine .add-row:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  border-style: solid;
 }
 
 .pricing-engine .footer-note {

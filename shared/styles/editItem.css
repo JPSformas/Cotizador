@@ -147,6 +147,7 @@ th.min-xl,td.min-xl { min-width: 170px; }
 
 .icon-button i:hover {
   transform: scale(1.1);
+  color: var(--brand-secondary);
 }
 
 .row.mb-4 {
@@ -155,24 +156,6 @@ th.min-xl,td.min-xl { min-width: 170px; }
 
 #configPrecios {
   display: none;
-}
-
-.tf-btn:not(.btn-reset):after {
-  bottom: -180% !important;
-  width: 102% !important;
-  height: 150% !important;
-  transition: transform 800ms cubic-bezier(0.48, 0, 0.12, 1) !important;
-  transform: skewY(9.3deg) scaleY(0) !important;
-}
-.tf-btn:not(.btn-reset):hover::after {
-  transform-origin: bottom center !important;
-  transform: skewY(9.3deg) scaleY(3) !important;
-}
-.tf-btn.btn-white::after {
-  background-color: var(--secondary) !important;
-}
-.tf-btn.btn-white.has-border:hover {
-  border-color: var(--secondary) !important;
 }
 
 /* --- Barra de acciones fija --- */
@@ -227,6 +210,18 @@ th.min-xl,td.min-xl { min-width: 170px; }
 .edit-item-action-bar__nav {
   min-height: 44px;
   min-width: 44px;
+  background-color: var(--white);
+  color: var(--main);
+  border: 1px solid var(--main);
+}
+
+.edit-item-action-bar__nav::after {
+  background-color: var(--main);
+}
+
+.edit-item-action-bar__nav:hover {
+  color: var(--white);
+  border-color: var(--main);
 }
 
 .edit-item-action-bar__save {

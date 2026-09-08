@@ -175,7 +175,7 @@ body {
 }
 
 .duplicate-cotization-btn:hover {
-  color: #0d6efd;
+  color: var(--brand-secondary);
  
   transform: scale(1.1);
 }
@@ -1016,7 +1016,7 @@ textarea.form-control.info-adicional {
 }
 
 .autocomplete-create-btn:hover {
-  color: #0d6efd;
+  color: var(--brand-secondary);
 }
 
 .autocomplete-create-btn:focus {
