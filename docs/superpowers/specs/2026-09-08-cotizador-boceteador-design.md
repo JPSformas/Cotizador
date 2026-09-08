@@ -15,7 +15,7 @@ The shop already extracted the generator's `#bocetoModal` into ES modules under 
 
 `ui.open({ photos, photoUrl, photoName, productId, placement, technique, printColors })` already accepts a photo list. `onSave` already returns a sketch with `composedImage` (PNG data URL) plus placement JSON.
 
-Cotizador `v6/editItem.html` already has the CTA (`#personalizarBtn`) and the image modal (`#imageModal`) with three grids: uploaded, product, personalizadas (`#zakekeImagesGrid`). `v5/editItem.html` has the same modal and main image, but no Personalizar button yet. Generic item pages and `detalle-cotizacion.html` share the image modal markup and are **out of this plan**.
+Cotizador `v6/editItem.html` already has the CTA (`#personalizarBtn`) and the image modal (`#imageModal`) with three grids: uploaded, product, personalizadas (`#zakekeImagesGrid`). `v5/editItem.html` has the same modal and main image, but no Personalizar button yet. Generic item pages share the image modal markup and are **in scope** (same opt-in as catalog). `detalle-cotizacion.html` is **out of this plan**.
 
 ## Goals
 
@@ -31,7 +31,7 @@ Cotizador `v6/editItem.html` already has the CTA (`#personalizarBtn`) and the im
 - Do not iframe the shop or the Netlify generator.
 - Do not copy shop host files (`photo-swiper.js`, `gallery-swiper.js`, `cart-bridge.js`, shop `host.js`).
 - Do not extract a shared npm package or symlink back to the shop repo. This is a snapshot copy. Shop engine fixes are not auto-synced.
-- Do not wire generic item pages (`editItem-generico*`) or the quote-table image modal on `detalle-cotizacion.html`.
+- Do not wire the quote-table image modal on `detalle-cotizacion.html`.
 - Do not add cart gating, color-variant invalidation, ficha A4, Corel PDF, Drive, or IA photo enhance.
 - Do not persist to a backend. Prototype only: DOM + hidden input + `sessionStorage`.
 - Do not rewrite `select-image-modal.js` beyond the event-delegation change required so dynamically added boceto tiles are selectable.
@@ -131,9 +131,9 @@ Change that binding to delegation on `#imageModal`: a click on `.image-item` (ex
 
 Add CSS link, hidden JSON input next to the button, empty `#formas-boceto-modal` before `</body>`, module script after the existing classic scripts.
 
-### v5/editItem.html
+### v5/editItem.html and genérico pages
 
-Add the same Personalizar button as v6 (SVG + `<span class="text">Personalizar</span>`), and add `mb-2` on `#selectImageBtn` so the stack matches. Then the same CSS / mount / script tags.
+Same opt-in as v6: Personalizar button, CSS, hidden JSON, empty `#formas-boceto-modal`, module script. Generic pages have fewer product stills (often one); the editor still opens with whatever `listPhotos()` returns.
 
 ### Host contract (`window.FormasBoceto`)
 
@@ -168,14 +168,14 @@ Serve from the **repo root**. `ui.js` fetches `./modal.html` via `import.meta.ur
   - `#personalizarBtn` opens `#formas-boceto-modal` and `#photoPickRow` has at least the four product stills
   - Restore: `addInitScript` writes a valid sketch (tiny PNG `composedImage`, `productId` = the page SKU) to `sessionStorage` key `formas:boceto:editItem` before load. After load, `#selectedProductImage` src is that PNG, `#zakekeImagesGrid [data-boceto="1"]` exists, button text is `Editar personalización`
   - With that restored tile, open `#imageModal` and click the boceto item: no `pageerror` (delegation)
-  - Generic pages and `detalle-cotizacion` load clean and have no `#formas-boceto-modal`
+  - Generic pages open the same editor (at least one still). `detalle-cotizacion` loads clean and has no `#formas-boceto-modal`
 
 ## Open decisions (locked here)
 
 | Topic | Choice |
 |---|---|
 | Source of engine | Snapshot copy into `shared/`, not a live link to the shop |
-| First pages | `v6/editItem.html` and `v5/editItem.html` only |
+| First pages | All catalog and genérico `editItem` pages in v5 and v6 |
 | Gallery destination | `#zakekeImagesGrid` (“Imágenes personalizadas”), one replaceable boceto tile |
 | Main image | Always replaced by the composed PNG on save |
 | Multi-select of 3 images | Slot 1 becomes the boceto only; previous extra slots are not preserved |

@@ -84,7 +84,13 @@ const server = createServer(async (req, res) => {
 await new Promise((r) => server.listen(PORT, r));
 browser = await chromium.launch();
 
-const ITEM = ['v6/editItem.html', 'v5/editItem.html'];
+const CATALOG = ['v6/editItem.html', 'v5/editItem.html'];
+const GENERIC = [
+  'v6/editItem-generico-costo.html',
+  'v6/editItem-generico-pvp.html',
+  'v5/editItem-generico.html',
+];
+const ITEM = CATALOG.concat(GENERIC);
 
 for (const path of ITEM) {
   await check('loads clean: ' + path, async () => {
@@ -108,8 +114,9 @@ for (const path of ITEM) {
         count: btns.length,
       };
     });
+    const minStills = CATALOG.includes(path) ? 4 : 1;
     assert(state.hidden === false, 'modal stayed hidden on ' + path);
-    assert(state.count >= 4, 'expected >= 4 photo picks, got ' + state.count + ' on ' + path);
+    assert(state.count >= minStills, 'expected >= ' + minStills + ' photo picks, got ' + state.count + ' on ' + path);
     assert(page.errors.length === 0, 'page errors: ' + page.errors.join(' | '));
     await page.close();
   });
@@ -149,9 +156,6 @@ for (const path of ITEM) {
 }
 
 const UNCHANGED = [
-  'v6/editItem-generico-costo.html',
-  'v6/editItem-generico-pvp.html',
-  'v5/editItem-generico.html',
   'v6/detalle-cotizacion.html',
   'v5/detalle-cotizacion.html',
 ];
