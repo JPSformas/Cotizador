@@ -1,0 +1,284 @@
+/* Scoped Boceteador modal — ported from generador-bocetos.html */
+#formas-boceto-modal[hidden]{display:none !important}
+#formas-boceto-modal [hidden]{display:none !important}
+#formas-boceto-modal{
+  --formas-lime:#8EE021; --formas-navy:#000085; --formas-green:#399F4A;
+  --formas-ink:#0B0B23; --formas-gray-700:#3D3D55; --formas-gray-500:#6E6E85;
+  --formas-gray-200:#E4E4ED; --formas-gray-100:#F1F1F6; --formas-gray-50:#F8F8FB;
+  --formas-yellow:#F9CE32;
+  --font-primary:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-display:'Montserrat','Poppins',system-ui,sans-serif;
+  --surface-page:#FFFFFF; --surface-sunken:var(--formas-gray-50);
+  --text-strong:var(--formas-ink); --text-body:var(--formas-gray-700); --text-muted:var(--formas-gray-500);
+  --border-subtle:var(--formas-gray-200);
+  --border:var(--formas-gray-200);
+  --sheet-accent:var(--formas-lime);
+}
+/* Theme `styles.css` styles every `button` as a shop pill (flex + space-between).
+   Neutralize that inside the modal; more specific rules below win. */
+#formas-boceto-modal button{
+  background:transparent;
+  background-color:transparent;
+  color:inherit;
+  padding:0;
+  border:none;
+  border-radius:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  width:auto;
+  max-width:none;
+  font-family:inherit;
+  font-size:inherit;
+  line-height:inherit;
+  font-weight:inherit;
+  letter-spacing:inherit;
+  text-transform:none;
+  transition:none;
+}
+#formas-boceto-modal .page{max-width:1140px;margin:0 auto;padding:40px 24px 72px}
+#formas-boceto-modal .label{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)}
+#formas-boceto-modal .eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--formas-green)}
+#formas-boceto-modal .display{font-family:var(--font-display);font-weight:800;letter-spacing:-.01em;color:var(--formas-navy)}
+#formas-boceto-modal .pill{display:inline-block;padding:5px 12px;border-radius:999px;background:var(--formas-navy);color:#fff;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+#formas-boceto-modal .rule{height:4px;width:56px;border-radius:2px;background:var(--sheet-accent)}
+#formas-boceto-modal .card{background:var(--surface-page);border:1px solid var(--border-subtle);border-radius:16px}
+#formas-boceto-modal .slot{background-color:var(--formas-gray-100);background-image:repeating-linear-gradient(-45deg,rgba(0,0,133,.05) 0 10px,rgba(0,0,133,0) 10px 20px)}
+#formas-boceto-modal .num{font-variant-numeric:tabular-nums}
+#formas-boceto-modal header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:26px}
+#formas-boceto-modal header.top h1{font-size:34px;line-height:1.02;margin:8px 0 0}
+#formas-boceto-modal .grid{display:grid;grid-template-columns:1.25fr .75fr;gap:22px;align-items:start}
+#formas-boceto-modal #stageCol{position:sticky;top:20px}
+@media (max-width:900px){#formas-boceto-modal .grid{grid-template-columns:1fr}#formas-boceto-modal #stageCol{position:static}}
+#formas-boceto-modal .col{display:flex;flex-direction:column;gap:16px}
+/* ---- escenario ---- */
+#formas-boceto-modal .stage-card{padding:16px}
+#formas-boceto-modal #frameWrap{display:flex;justify-content:center}
+#formas-boceto-modal #frame{position:relative;display:inline-block;border-radius:14px;overflow:hidden;max-width:100%;touch-action:none;user-select:none;-webkit-user-select:none}
+#formas-boceto-modal #photo{display:block;max-width:100%;max-height:580px;width:auto;height:auto}
+#formas-boceto-modal #emptyState{aspect-ratio:4/3.4;width:640px;max-width:100%;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;cursor:pointer;border:1.5px dashed var(--border-subtle)}
+#formas-boceto-modal #emptyState .big{font-family:var(--font-display);font-weight:800;font-size:19px;color:var(--formas-navy)}
+#formas-boceto-modal #emptyState p{margin:0;color:var(--text-muted);font-size:13px;max-width:38ch}
+#formas-boceto-modal #frame.drawing{cursor:crosshair}
+/* el hint vive en #frameWrap (no en #frame): con fotos finitas o zoom no se rompe ni escala */
+#formas-boceto-modal #drawHint{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;padding-top:58px;pointer-events:none;z-index:6}
+#formas-boceto-modal #drawHint span{background:var(--formas-navy);color:#fff;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(11,11,35,.35);white-space:nowrap;animation:bmHintPulse 1.6s ease-in-out infinite}
+@keyframes bmHintPulse{0%,100%{box-shadow:0 4px 14px rgba(11,11,35,.35)}50%{box-shadow:0 0 0 6px rgba(142,224,33,.45), 0 4px 18px rgba(11,11,35,.4)}}
+/* el botón de dibujar área queda "encendido" mientras se dibuja */
+#formas-boceto-modal #drawZoneBtn[aria-pressed="true"]{background:var(--formas-navy);color:#fff;border-color:var(--formas-navy)}
+#formas-boceto-modal #zone{position:absolute;border:2px dashed var(--sheet-accent);border-radius:4px;cursor:move;z-index:2;box-shadow:0 0 0 9999px rgba(11,11,35,.14)}
+#formas-boceto-modal #zone.no-dim{box-shadow:none}
+#formas-boceto-modal .logoItem{position:absolute;cursor:move;z-index:4}
+#formas-boceto-modal .logoItem img{width:100%;height:100%;display:block;pointer-events:none}
+#formas-boceto-modal .logoItem.selected{outline:1.5px solid var(--sheet-accent);outline-offset:1px}
+#formas-boceto-modal .handle{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--sheet-accent);border:2.5px solid #fff;box-shadow:0 1px 4px rgba(11,11,35,.35);z-index:5;touch-action:none}
+#formas-boceto-modal .handle.tl{top:-8px;left:-8px;cursor:nwse-resize}#formas-boceto-modal .handle.tr{top:-8px;right:-8px;cursor:nesw-resize}
+#formas-boceto-modal .handle.bl{bottom:-8px;left:-8px;cursor:nesw-resize}#formas-boceto-modal .handle.br{bottom:-8px;right:-8px;cursor:nwse-resize}
+#formas-boceto-modal #zone .handle{background:#fff;border-color:var(--sheet-accent)}
+#formas-boceto-modal #measureChip{position:absolute;z-index:6;translate:-50% 0;background:var(--formas-navy);color:#fff;font-size:11.5px;font-weight:700;padding:4px 12px;border-radius:999px;white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums}
+/* regla de calibración */
+#formas-boceto-modal #ruler{position:absolute;inset:0;pointer-events:none;z-index:7}
+#formas-boceto-modal #rulerLine{position:absolute;height:14px;margin-top:-7px;transform-origin:0 50%;pointer-events:auto;cursor:move}
+#formas-boceto-modal #rulerLine::before{content:"";position:absolute;left:0;right:0;top:50%;margin-top:-1.25px;height:2.5px;background:var(--formas-navy)}
+#formas-boceto-modal #rulerLine i{position:absolute;top:1px;width:2.5px;height:12px;background:var(--formas-navy)}
+#formas-boceto-modal #rulerLine i:first-child{left:0}#rulerLine i:last-child{right:0}
+#formas-boceto-modal .ruler-handle{position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;border:3.5px solid var(--formas-navy);translate:-50% -50%;pointer-events:auto;cursor:grab;box-shadow:0 1px 5px rgba(11,11,35,.35);touch-action:none}
+#formas-boceto-modal #rulerLabel{position:absolute;translate:-50% -145%;background:var(--formas-navy);color:#fff;font-size:11.5px;font-weight:700;padding:4px 12px;border-radius:999px;white-space:nowrap;pointer-events:auto;cursor:move;font-variant-numeric:tabular-nums}
+/* eliminar logo */
+#formas-boceto-modal .logoDelete{position:absolute;top:-13px;right:-13px;width:26px;height:26px;border-radius:50%;background:#fff;border:1.5px solid var(--border-subtle);color:var(--formas-ink);font-size:15px;font-weight:700;line-height:1;cursor:pointer;z-index:6;display:grid;place-items:center;box-shadow:0 1px 5px rgba(11,11,35,.3);padding:0;font-family:var(--font-primary)}
+#formas-boceto-modal .logoDelete:hover{background:#EF7958;color:#fff;border-color:#EF7958}
+/* ---- panel de pasos ---- */
+#formas-boceto-modal .step{padding:16px 16px 18px}
+#formas-boceto-modal .step-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+#formas-boceto-modal .step-num{width:26px;height:26px;border-radius:50%;background:var(--formas-navy);color:#fff;font-family:var(--font-display);font-weight:800;font-size:13px;display:grid;place-items:center;flex:none}
+#formas-boceto-modal .step.done .step-num{background:var(--formas-green)}
+#formas-boceto-modal .step.locked{opacity:.45;pointer-events:none}
+#formas-boceto-modal .step-head h2{font-family:var(--font-display);font-weight:800;font-size:16px;color:var(--formas-navy);margin:0;letter-spacing:-.01em}
+/* toggle de modo de medida */
+#formas-boceto-modal .mode-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#formas-boceto-modal .mode-opt{display:flex;flex-direction:column; justify-content:flex-start;align-items:flex-start;gap:8px;padding:12px;border:1.5px solid var(--border-subtle);border-radius:12px;background:var(--surface-page);cursor:pointer;font-family:var(--font-primary);text-align:left;transition:border-color .15s, box-shadow .15s}
+#formas-boceto-modal .mode-opt:hover{border-color:var(--formas-navy)}
+#formas-boceto-modal .mode-opt[aria-pressed="true"]{border-color:var(--formas-navy);background:var(--surface-sunken);box-shadow:0 0 0 2.5px color-mix(in srgb,var(--sheet-accent) 55%, transparent)}
+#formas-boceto-modal .mode-opt svg{width:26px;height:26px;flex:none}
+#formas-boceto-modal .mode-opt .t{font-size:12.5px;font-weight:700;color:var(--text-strong);line-height:1.3}
+#formas-boceto-modal .mode-opt small{display:block;margin-top:4px;font-weight:400;color:var(--text-muted);font-size:11px;line-height:1.35}
+#formas-boceto-modal .field{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+#formas-boceto-modal .field-row{display:flex;gap:10px}
+#formas-boceto-modal .field-row .field{flex:1;margin-top:10px}
+#formas-boceto-modal select, #formas-boceto-modal input[type="number"], #formas-boceto-modal input[type="text"]{font-family:var(--font-primary);font-size:14px;font-weight:600;color:var(--text-strong);background:var(--surface-page);border:1.5px solid var(--border-subtle);border-radius:12px;padding:9px 12px;width:100%}
+#formas-boceto-modal select:focus, #formas-boceto-modal input:focus{outline:2px solid var(--sheet-accent);outline-offset:1px;border-color:var(--sheet-accent)}
+#formas-boceto-modal .suffix-wrap{position:relative}
+#formas-boceto-modal .suffix-wrap .suffix{position:absolute;right:12px;top:50%;translate:0 -50%;color:var(--text-muted);font-size:12px;font-weight:600;pointer-events:none}
+#formas-boceto-modal .btn{display:block;width:100%;border-radius:12px;padding:11px 16px;font-family:var(--font-primary);font-size:14px;font-weight:700;border:1.5px solid transparent;cursor:pointer;text-align:center;justify-content:center;transition:filter .15s}
+#formas-boceto-modal .btn-primary{background:var(--sheet-accent);color:var(--formas-navy)}
+#formas-boceto-modal .btn-primary:hover{filter:brightness(.95)}
+#formas-boceto-modal .btn-primary:disabled{filter:grayscale(.6) opacity(.5);cursor:not-allowed}
+#formas-boceto-modal .btn[disabled]{opacity:.65;cursor:progress}
+#formas-boceto-modal .btn-secondary{background:var(--surface-page);color:var(--text-strong);border-color:var(--border-subtle)}
+#formas-boceto-modal .btn-secondary:hover{background:var(--surface-sunken)}
+#formas-boceto-modal .btn:focus-visible{outline:2px solid var(--formas-navy);outline-offset:2px}
+#formas-boceto-modal .btn+.btn{margin-top:8px}
+#formas-boceto-modal .upload-tile{border:1.5px dashed var(--border-subtle);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .15s}
+#formas-boceto-modal .upload-tile:hover{border-color:var(--sheet-accent)}
+#formas-boceto-modal .upload-tile .thumb{width:46px;height:46px;border-radius:10px;flex:none;display:grid;place-items:center;overflow:hidden}
+#formas-boceto-modal .upload-tile .thumb img{width:100%;height:100%;object-fit:contain}
+#formas-boceto-modal .upload-tile .txt{font-size:13px;font-weight:600}
+#formas-boceto-modal .upload-tile .txt small{display:block;font-weight:400;color:var(--text-muted);font-size:11.5px}
+#formas-boceto-modal .check{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text-body);margin-top:10px;cursor:pointer}
+#formas-boceto-modal .check input{width:16px;height:16px;accent-color:var(--formas-navy)}
+#formas-boceto-modal .note{display:flex;gap:8px;align-items:baseline;font-size:12.5px; line-height:normal;color:var(--text-body);background:var(--surface-sunken);border:1px solid var(--border-subtle);border-left:4px solid var(--formas-yellow);border-radius:12px;padding:9px 12px;margin-top:10px}
+#formas-boceto-modal .readout{display:flex;flex-direction:column;margin-top:10px;border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden}
+#formas-boceto-modal .readout .row{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border-bottom:1px solid var(--border-subtle);font-size:13px}
+#formas-boceto-modal .readout .row:last-child{border-bottom:0}
+#formas-boceto-modal .readout .val{font-weight:700}
+#formas-boceto-modal footer.bottom{margin-top:30px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--border-subtle);padding-top:16px}
+#formas-boceto-modal footer.bottom .tag{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--formas-green)}
+#formas-boceto-modal footer.bottom small{color:var(--text-muted)}
+
+/* ---------- Modal "Cargá tu logo" ---------- */
+#formas-boceto-modal{position:fixed; inset:0; z-index:11000; display:flex; align-items:center; justify-content:center; padding:18px}
+#formas-boceto-modal .bm-backdrop{position:absolute; inset:0; background:rgba(11,11,35,.55)}
+#formas-boceto-modal .bm-shell{position:relative; width:min(1240px,100%); height:min(94vh,100%); background:#EDEDF2; border-radius:20px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 24px 80px rgba(11,11,35,.4)}
+#formas-boceto-modal .bm-head{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 24px; background:#fff; border-bottom:1px solid var(--border)}
+#formas-boceto-modal .bm-eyebrow{font-size:10px; font-weight:600; letter-spacing:.22em; text-transform:uppercase; color:#399F4A}
+#formas-boceto-modal .bm-title{font-family:'Montserrat',sans-serif; font-weight:800; font-size:22px; color:#000085; margin:2px 0 0; letter-spacing:-.01em; line-height: inherit;}
+#formas-boceto-modal .bm-close{width:34px; height:34px; border-radius:50%; border:1.5px solid var(--border); background:#fff; color:#0B0B23; font-size:17px; font-weight:700; cursor:pointer; display:grid; place-items:center; justify-content:center; padding:0}
+#formas-boceto-modal .bm-close:hover{background:#EF7958; color:#fff; border-color:#EF7958}
+#formas-boceto-modal .bm-body{flex:1; overflow:auto; padding:22px}
+#formas-boceto-modal #stageCol{top:0}
+#formas-boceto-modal .seg{display:flex; gap:6px; margin-top:8px}
+#formas-boceto-modal .seg button{flex:1; padding:8px 6px; border:1.5px solid var(--formas-gray-200); border-radius:10px; background:#fff; font-family:var(--font-primary); font-size:12px; font-weight:700; color:var(--formas-ink); cursor:pointer}
+#formas-boceto-modal .seg button[aria-pressed="true"]{border-color:var(--formas-navy); background:var(--formas-gray-50); box-shadow:0 0 0 2.5px color-mix(in srgb, var(--formas-lime) 55%, transparent)}
+#formas-boceto-modal .lockBtn{align-self:end; margin-bottom:1px; width:42px; height:39px; border:1.5px solid var(--formas-gray-200); border-radius:10px; background:#fff; cursor:pointer; font-size:15px; flex:none}
+#formas-boceto-modal .lockBtn[aria-pressed="true"]{border-color:var(--formas-navy); background:var(--formas-navy)}
+#formas-boceto-modal .logoRotate{position:absolute; top:-36px; left:50%; translate:-50% 0; width:26px; height:26px; border-radius:50%; background:#fff; border:1.5px solid var(--formas-gray-200); display:grid; place-items:center; cursor:grab; font-size:14px; font-weight:700; color:var(--formas-navy); box-shadow:0 1px 5px rgba(11,11,35,.3); z-index:6}
+#formas-boceto-modal input[type=range]{width:100%; accent-color:var(--formas-navy)}
+#formas-boceto-modal .suffix-wrap input{padding-right:38px}
+#formas-boceto-modal input.need{border-color:#F9CE32; box-shadow:0 0 0 2.5px rgba(249,206,50,.35)}
+#formas-boceto-modal select{padding-right:32px}
+#formas-boceto-modal #trimUndo, #formas-boceto-modal #undoDeleteBtn{border:none; background:none; color:var(--formas-navy); font-family:var(--font-primary); font-size:12px; font-weight:700; text-decoration:underline; cursor:pointer; padding:0; flex:none; white-space:nowrap}
+#formas-boceto-modal #trimUndo:hover, #formas-boceto-modal #undoDeleteBtn:hover{color:#EF7958}
+/* zoom y paneo del canvas */
+#formas-boceto-modal #frameWrap{overflow:hidden; position:relative; border-radius:14px}
+#formas-boceto-modal{--Z:1} /* default para todo lo que está fuera del lienzo con zoom (p. ej. manijas del recorte); sin esto sus calc(--Z) quedan inválidos y las manijas colapsan */
+#formas-boceto-modal #frame{transform-origin:0 0; --Z:1}
+/* con zoom, los controles compensan la escala (--Z) y mantienen su tamaño visual */
+#formas-boceto-modal .handle{width:calc(14px/var(--Z)); height:calc(14px/var(--Z)); border-width:calc(2.5px/var(--Z))}
+#formas-boceto-modal .handle.tl{top:calc(-8px/var(--Z)); left:calc(-8px/var(--Z))}
+#formas-boceto-modal .handle.tr{top:calc(-8px/var(--Z)); right:calc(-8px/var(--Z)); cursor:nesw-resize}
+#formas-boceto-modal .handle.bl{bottom:calc(-8px/var(--Z)); left:calc(-8px/var(--Z)); cursor:nesw-resize}
+#formas-boceto-modal .handle.br{bottom:calc(-8px/var(--Z)); right:calc(-8px/var(--Z)); cursor:nwse-resize}
+#formas-boceto-modal .logoItem.selected{outline-width:calc(1.5px/var(--Z))}
+#formas-boceto-modal #zone{border-width:calc(2px/var(--Z))}
+#formas-boceto-modal .logoDelete{width:calc(26px/var(--Z)); height:calc(26px/var(--Z)); top:calc(-13px/var(--Z)); right:calc(-13px/var(--Z)); font-size:calc(15px/var(--Z)); border-width:calc(1.5px/var(--Z))}
+#formas-boceto-modal .logoRotate{width:calc(26px/var(--Z)); height:calc(26px/var(--Z)); top:calc(-36px/var(--Z)); font-size:calc(14px/var(--Z)); border-width:calc(1.5px/var(--Z))}
+#formas-boceto-modal #measureChip{font-size:calc(11.5px/var(--Z)); padding:calc(4px/var(--Z)) calc(12px/var(--Z))}
+#formas-boceto-modal #rulerLine{height:calc(14px/var(--Z)); margin-top:calc(-7px/var(--Z))}
+#formas-boceto-modal #rulerLine::before{height:calc(2.5px/var(--Z)); margin-top:calc(-1.25px/var(--Z))}
+#formas-boceto-modal #rulerLine i{width:calc(2.5px/var(--Z)); height:calc(12px/var(--Z))}
+#formas-boceto-modal .ruler-handle{width:calc(18px/var(--Z)); height:calc(18px/var(--Z)); border-width:calc(3.5px/var(--Z))}
+#formas-boceto-modal #rulerLabel{font-size:calc(11.5px/var(--Z)); padding:calc(4px/var(--Z)) calc(12px/var(--Z))}
+#formas-boceto-modal #frame.panable{cursor:grab}
+#formas-boceto-modal #frame.panable:active{cursor:grabbing}
+#formas-boceto-modal #zoomCtrls{position:absolute; bottom:28px; right:28px; z-index:10; display:flex; align-items:center; gap:2px; padding:4px 6px; border-radius:999px; border:1.5px solid var(--formas-gray-200); background:#fff; box-shadow:0 2px 8px rgba(11,11,35,.18)}
+#formas-boceto-modal #zoomCtrls button{width:26px; height:26px; border:none; background:none; border-radius:50%; font-family:var(--font-primary); font-size:15px; font-weight:700; color:var(--formas-navy); cursor:pointer; display:grid; place-items:center; padding:0}
+#formas-boceto-modal #zoomCtrls button:hover{background:var(--formas-gray-100)}
+#formas-boceto-modal #zoomCtrls #zoomLabel{font-family:var(--font-display); font-size:11px; font-weight:800; color:var(--formas-navy); min-width:38px; text-align:center; font-variant-numeric:tabular-nums}
+/* alineación rápida del logo en el área */
+#formas-boceto-modal #alignCtrls{position:absolute; bottom:28px; left:28px; z-index:10; display:flex; align-items:center; gap:2px; padding:4px 6px; border-radius:999px; border:1.5px solid var(--formas-gray-200); background:#fff; box-shadow:0 2px 8px rgba(11,11,35,.18)}
+#formas-boceto-modal #alignCtrls button{width:28px; height:26px; border:none; background:none; border-radius:8px; font-size:14px; font-weight:700; color:var(--formas-navy); cursor:pointer; display:grid; place-items:center; padding:0}
+#formas-boceto-modal #alignCtrls button:hover{background:var(--formas-gray-100)}
+/* el área se desvanece mientras se manipula el logo */
+#formas-boceto-modal #zone{transition:opacity .15s}
+#formas-boceto-modal #zone.faded{opacity:.15; box-shadow:none !important}
+/* recorte manual */
+#formas-boceto-modal #cropModal{position:absolute; inset:0; z-index:50; background:rgba(11,11,35,.5); display:flex; align-items:center; justify-content:center; padding:20px}
+#formas-boceto-modal .cm-card{background:#fff; border-radius:16px; padding:18px; width:min(700px,100%); max-height:100%; overflow:auto; box-shadow:0 20px 60px rgba(11,11,35,.4)}
+#formas-boceto-modal .cm-head{display:flex; justify-content:space-between; align-items:center; gap:12px}
+#formas-boceto-modal .cm-head h3{font-family:var(--font-display); font-weight:800; color:var(--formas-navy); font-size:17px; margin:0}
+#formas-boceto-modal .cm-hint{font-size:12.5px; color:var(--formas-gray-500); margin:6px 0 12px}
+#formas-boceto-modal #cropStageWrap{display:flex; justify-content:center}
+/* el padding deja lugar para las manijas cuando el rectángulo ocupa toda la imagen
+   (sin él, overflow:hidden se las comía y no se podía redimensionar) */
+#formas-boceto-modal #cropStage{position:relative; display:inline-block; max-width:100%; padding:16px; touch-action:none; user-select:none; -webkit-user-select:none; background:repeating-conic-gradient(#ECECF2 0 25%, #fff 0 50%) 0 0/16px 16px; border-radius:8px; overflow:hidden}
+#formas-boceto-modal #cropArea{position:relative; display:inline-block; max-width:100%}
+#formas-boceto-modal #cropImg{display:block; max-width:100%; max-height:52vh}
+#formas-boceto-modal #cropRect{position:absolute; border:2px dashed var(--formas-navy); box-shadow:0 0 0 9999px rgba(255,255,255,.6); cursor:move}
+#formas-boceto-modal #cropRect .handle{background:#fff; border:2.5px solid var(--formas-navy)}
+#formas-boceto-modal #cropStage.dark{background:repeating-conic-gradient(#3A3A55 0 25%, #23233D 0 50%) 0 0/16px 16px}
+#formas-boceto-modal #cropStage.dark #cropRect{border-color:var(--formas-lime); box-shadow:0 0 0 9999px rgba(11,11,35,.55)}
+#formas-boceto-modal #cropStage.dark #cropRect .handle{border-color:var(--formas-lime)}
+#formas-boceto-modal #cropBgBtn{flex:none; margin-left:auto; padding:7px 12px; border:1.5px solid var(--formas-gray-200); border-radius:999px; background:#fff; font-family:var(--font-primary); font-size:12px; font-weight:700; color:var(--formas-navy); cursor:pointer; white-space:nowrap}
+#formas-boceto-modal #cropBgBtn:hover{border-color:var(--formas-navy)}
+#formas-boceto-modal #cropBgBtn[aria-pressed="true"]{background:var(--formas-navy); color:#fff; border-color:var(--formas-navy)}
+#formas-boceto-modal .cm-actions{display:flex; gap:10px; margin-top:14px}
+#formas-boceto-modal .cm-actions .btn{flex:1; margin:0}
+#formas-boceto-modal input[type=number]{appearance:textfield; -moz-appearance:textfield}
+#formas-boceto-modal input[type=number]::-webkit-outer-spin-button,
+#formas-boceto-modal input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+/* vista limpia: sin guías, pero el logo sigue siendo arrastrable */
+#formas-boceto-modal .stage-card{position:relative}
+#formas-boceto-modal #cleanToggle{position:absolute; top:28px; right:28px; z-index:10; display:flex; align-items:center; gap:6px; padding:7px 14px; border-radius:999px; border:1.5px solid var(--formas-gray-200); background:#fff; color:var(--formas-navy); font-family:var(--font-primary); font-size:12px; font-weight:700; cursor:pointer; box-shadow:0 2px 8px rgba(11,11,35,.18)}
+#formas-boceto-modal #cleanToggle:hover{border-color:var(--formas-navy)}
+#formas-boceto-modal #cleanToggle[aria-pressed="true"]{background:var(--formas-navy); color:#fff; border-color:var(--formas-navy)}
+#formas-boceto-modal #frame.clean #zone,
+#formas-boceto-modal #frame.clean .handle,
+#formas-boceto-modal #frame.clean #measureChip,
+#formas-boceto-modal #frame.clean #ruler,
+#formas-boceto-modal #frame.clean .logoDelete,
+#formas-boceto-modal #frame.clean .logoRotate{display:none !important}
+#formas-boceto-modal #frame.clean .logoItem.selected{outline:none}
+#formas-boceto-modal .logoChips{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+#formas-boceto-modal .logoChip{width:48px; height:48px; border-radius:10px; border:1.5px solid var(--formas-gray-200); background:#fff; padding:3px; cursor:pointer; flex:none}
+#formas-boceto-modal .logoChip img{width:100%; height:100%; object-fit:contain; display:block}
+#formas-boceto-modal .logoChip[aria-pressed="true"]{border-color:var(--formas-navy); box-shadow:0 0 0 2.5px color-mix(in srgb, var(--formas-lime) 55%, transparent)}
+#formas-boceto-modal .addColor{margin-top:6px;padding:8px 10px;border:1.5px dashed var(--formas-gray-200);border-radius:10px;background:#fff;font:inherit;font-size:12px;font-weight:700;cursor:pointer;width:100%;color:var(--formas-navy)}
+#formas-boceto-modal #photoPick{margin-bottom:4px}
+#formas-boceto-modal .photoPick-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+#formas-boceto-modal .photoPick-btn{width:68px;height:68px;padding:3px;border:1.5px solid var(--formas-gray-200);border-radius:10px;background:#fff;cursor:pointer;flex:none}
+#formas-boceto-modal .photoPick-btn img{width:100%;height:100%;object-fit:cover;border-radius:6px;display:block;pointer-events:none}
+#formas-boceto-modal .photoPick-btn[aria-pressed="true"]{border-color:var(--formas-navy);box-shadow:0 0 0 2.5px color-mix(in srgb,var(--formas-lime) 55%,transparent)}
+#formas-boceto-modal .photoPick-hint{margin:8px 0 0;font-size:11.5px;color:var(--text-muted);line-height:1.4}
+
+/* Injected thumbs skip the page-load stagger, so force them visible and sized. */
+.tf-product-media-thumbs .swiper-slide[data-boceto="1"] {
+  opacity: 1;
+  transform: none;
+  width: 80px;
+}
+.tf-product-media-thumbs .swiper-slide[data-boceto="1"] .item,
+.tf-product-media-thumbs .swiper-slide[data-boceto="1"] img {
+  height: 100%;
+  max-width: 70px;
+  max-height: 70px;
+  object-fit: cover;
+}
+.tf-product-personalization #btn-personaliza-ahora {
+  width: 100%;
+  max-width: 100%;
+}
+.tf-product-personalization .tf-product-image-upload:has(#btn-personaliza-ahora) {
+  width: 100%;
+  display: block;
+}
+#formas-boceto-modal #cropModal[hidden]{display:none !important}
+#formas-boceto-modal .pcRow{display:flex; gap:6px; align-items:center; margin-top:6px}
+#formas-boceto-modal .pcRow input[type=color]{width:34px; height:32px; border:1px solid var(--border); border-radius:8px; padding:6px; background:#fff; flex:none}
+#formas-boceto-modal .pcRow input[type=text]{flex:1; min-width:0}
+#formas-boceto-modal .pcRow .del{border:none; background:#fff; border-radius:6px; box-shadow:0 0 0 1px var(--border); cursor:pointer; color:var(--formas-gray-500); font-size:11px; padding:5px 7px; flex:none}
+#formas-boceto-modal .pcRow .del:hover{background:#EF7958; color:#fff}
+#formas-boceto-modal .pcRow .pms{border:none; background:#fff; border-radius:6px; box-shadow:0 0 0 1px var(--border); cursor:pointer; color:var(--formas-navy); font-size:13px; font-weight:700; padding:4px 7px; flex:none}
+#formas-boceto-modal .pcRow .pms:hover{background:var(--formas-navy); color:#fff}
+#formas-boceto-modal .pcRow input.pcMiss{border-color:#EF7958}
+#formas-boceto-modal .codeToggle{display:flex; gap:6px}
+#formas-boceto-modal .codeToggle button{flex:1; padding:7px 8px; border:1.5px solid var(--formas-gray-200); border-radius:10px; background:#fff; font:inherit; font-size:12px; font-weight:700; cursor:pointer; color:var(--formas-navy)}
+#formas-boceto-modal .codeToggle button[aria-pressed="true"]{border-color:var(--formas-navy); background:var(--formas-gray-50); box-shadow:0 0 0 2.5px color-mix(in srgb, var(--formas-lime) 55%, transparent)}
+#pantonePop{position:fixed; z-index:12000; background:#fff; border:1px solid #E4E4ED; border-radius:10px; max-height:264px; overflow:auto; padding:4px 0}
+#pantonePop .ph{font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#6E6E85; padding:7px 12px 3px}
+#pantonePop .pi{display:flex; align-items:center; gap:9px; padding:7px 12px; cursor:pointer; font-size:12.5px}
+#pantonePop .pi:hover,#pantonePop .pi.act{background:#F8F8FB}
+#pantonePop .sw{width:17px; height:17px; border-radius:5px; border:1px solid rgba(0,0,0,.14); flex:none}
+#pantonePop .cd{font-weight:700}
+#pantonePop .hx{margin-left:auto; font-family:ui-monospace,SFMono-Regular,monospace; font-size:10.5px; color:#6E6E85}
+#pantonePop .none{padding:10px 12px; font-size:12px; color:#6E6E85}

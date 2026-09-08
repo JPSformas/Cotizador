@@ -15,6 +15,7 @@
   <link href="../shared/styles/complementos.css" rel="stylesheet">
   <link href="../shared/styles/sidebar.css" rel="stylesheet">
   <link href="../shared/styles/select-image-modal.css" rel="stylesheet">
+  <link href="../shared/styles/boceteador.css" rel="stylesheet">
   <link href="../shared/styles/editItem.css" rel="stylesheet">
   <link href="../shared/styles/table-empty-state.css" rel="stylesheet">
   <link href="styles/pricing-table.css" rel="stylesheet">
@@ -64,7 +65,14 @@
         <div class="row">
           <div class="col-md-3  mb-3 mb-md-0">
             <div class="product-image mb-3"><img src="../shared/IMG/placeholder3.jpg" class="product-img" id="selectedProductImage"></div>
-            <button type="button" class="btn btn-outline-secondary w-100" id="selectImageBtn"><i class="fas fa-image me-1"></i>Seleccionar imagen</button>
+            <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="selectImageBtn"><i class="fas fa-image me-1"></i>Seleccionar imagen</button>
+            <button type="button" class="btn btn-outline-secondary w-100" id="personalizarBtn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="9" viewBox="0 0 20 9" fill="none">
+                <path d="M18.7294 1.72515C17.953 0.684393 16.9962 0.0913434 15.9618 0.00965322C14.8577 -0.0762806 13.7091 0.4128 12.6393 1.42597C11.4793 2.52507 10.6789 3.87986 9.95162 5.24207C9.90481 5.33118 9.76894 5.33118 9.72213 5.24207C9.00853 3.90107 8.21387 2.576 7.0881 1.48114C5.97375 0.397947 4.76692 -0.104925 3.60233 0.0245059C2.4583 0.151815 1.43985 0.884905 0.658894 2.14208C-0.0341492 3.2571 -0.181435 4.29149 0.221603 5.21554C0.88382 6.73159 2.86019 7.5347 4.4027 7.94102C6.15986 8.40464 8.0015 8.6391 9.83173 8.6391C10.6606 8.6391 11.4884 8.5903 12.3048 8.49376C14.4501 8.23808 17.3011 7.64397 18.7077 6.26691C19.9785 5.02246 19.9865 3.40881 18.7306 1.72515H18.7294ZM7.47858 6.22341C6.46813 6.09292 5.44055 5.91681 4.47806 5.60596C3.2815 5.21979 2.62728 4.80603 2.47771 4.34029C2.35782 3.96791 2.54621 3.47459 3.04059 2.87517C3.36485 2.48158 3.66627 2.27045 3.93344 2.24924C3.94943 2.24818 3.96541 2.24711 3.98254 2.24711C4.2714 2.24711 4.63448 2.4402 5.09232 2.83486C6.1119 3.71435 6.86203 4.93016 7.51512 6.17673C7.52768 6.20007 7.50598 6.22659 7.47858 6.22341ZM17.1892 4.34029C17.0385 4.80603 16.3843 5.21979 15.1888 5.60596C14.2263 5.91681 13.1988 6.09292 12.1883 6.22341C12.1609 6.22659 12.1392 6.20007 12.1518 6.17673C12.8049 4.93016 13.555 3.71435 14.5746 2.83486C15.0324 2.4402 15.3966 2.24711 15.6844 2.24711C15.7015 2.24711 15.7175 2.24711 15.7335 2.24924C16.0018 2.27045 16.302 2.48052 16.6263 2.87517C17.1207 3.47459 17.3091 3.96791 17.1892 4.34029Z" fill="currentColor"/>
+              </svg>
+              <span class="text">Personalizar</span>
+            </button>
+            <input type="hidden" id="formas-boceto-json" name="boceto" value="">
           </div>
           <div class="col-md-9">
             <div class="row mb-3">
@@ -350,5 +358,7 @@
 <script src="../shared/js-scripts/price-update-indicator.js"></script>
 <script src="js-scripts/pricing-engine.js"></script>
 <script src="../shared/js-scripts/cotizacion-edit-item-nav.js"></script>
+  <div id="formas-boceto-modal" hidden></div>
+<script type="module" src="../shared/js-scripts/boceteador/host.js"></script>
 </body>
 </html>
