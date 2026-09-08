@@ -15,6 +15,7 @@
   <link href="../shared/styles/complementos.css" rel="stylesheet">
   <link href="../shared/styles/sidebar.css" rel="stylesheet">
   <link href="../shared/styles/select-image-modal.css" rel="stylesheet">
+  <link href="../shared/styles/boceteador.css" rel="stylesheet">
   <link href="../shared/styles/editItem.css" rel="stylesheet">
   <link href="../shared/styles/table-empty-state.css" rel="stylesheet">
   <link href="styles/pricing-table.css" rel="stylesheet">
@@ -71,6 +72,7 @@
               </svg>
               <span class="text">Personalizar</span>
             </button>
+            <input type="hidden" id="formas-boceto-json" name="boceto" value="">
           </div>
           <div class="col-md-9">
             <div class="row mb-3">
@@ -356,5 +358,7 @@
 <script src="../shared/js-scripts/price-update-indicator.js"></script>
 <script src="js-scripts/pricing-engine.js"></script>
 <script src="../shared/js-scripts/cotizacion-edit-item-nav.js"></script>
+  <div id="formas-boceto-modal" hidden></div>
+<script type="module" src="../shared/js-scripts/boceteador/host.js"></script>
 </body>
 </html>
