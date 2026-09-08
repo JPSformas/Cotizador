@@ -19,7 +19,7 @@ import {
 } from "./logo-pipeline.js";
 import { createSketch } from "./payload.js";
 import { createPrintColors } from "./print-colors.js";
-import { samePhotoUrl } from "./photo-swiper.js";
+import { samePhotoUrl } from "./photo-gallery.js";
 
 function fmtCm(n) {
   return n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
